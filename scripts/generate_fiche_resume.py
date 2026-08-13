@@ -35,7 +35,7 @@ CW = W - 2 * MX  # ~504.57 pt
 SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR   = os.path.join(SCRIPT_DIR, "..", "assets")
 OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "..", "docs")
-OUTPUT_PATH = os.path.join(OUTPUT_DIR, "fiche-resume-association.pdf")
+OUTPUT_PATH = os.path.join(OUTPUT_DIR, "pdf-presentation-ambition-campus.pdf")
 PHOTO_ORIG  = os.path.join(ASSET_DIR, "photo_equipe.png")
 PHOTO_CROP  = os.path.join(ASSET_DIR, "photo_equipe_cropped.png")
 
