@@ -1,6 +1,6 @@
 """
 Ambition Campus - Guide & Plan d'Action Financement (1 page A4)
-Version grand format : Feuille de route retirée, 4 blocs piliers maximisés et remplis.
+Version épurée : suppression des sous-titres demandés, header compact et élégant.
 Structure par répétition : QUI CIBLER • COMMENT ACTIVER • COMBIEN VISER • RÈGLE & FISCALITÉ.
 """
 
@@ -17,7 +17,6 @@ import pypdf
 # -- Couleurs charte --
 NAVY        = HexColor("#0F1E36")
 GOLD        = HexColor("#C9A84C")
-GOLD_LIGHT  = HexColor("#FDFBF4")
 SLATE       = HexColor("#1E293B")
 MUTED       = HexColor("#475569")
 SURFACE     = HexColor("#F8FAFC")
@@ -56,9 +55,9 @@ def generate_pdf():
     c = canvas.Canvas(OUTPUT_PATH, pagesize=A4)
 
     # ================================================================
-    # 1. HEADER STRATÉGIQUE (Hauteur: 56pt)
+    # 1. HEADER ÉPURÉ (Hauteur: 46pt)
     # ================================================================
-    hh = 56
+    hh = 46
     hy = H - hh
     c.setFillColor(NAVY)
     c.rect(0, hy, W, hh, fill=1, stroke=0)
@@ -68,20 +67,17 @@ def generate_pdf():
     c.setLineWidth(2.2)
     c.line(0, hy, W, hy)
 
-    # Titres
+    # Titre principal épuré
     c.setFillColor(WHITE)
-    c.setFont("Helvetica-Bold", 17)
-    c.drawString(MX, hy + 31, "AMBITION CAMPUS  |  PLAN D'ACTION FINANCIER")
-    
-    c.setFillColor(GOLD)
-    c.setFont("Helvetica-Bold", 8.2)
-    c.drawString(MX, hy + 15, "OBJECTIF 2026-2027 : DIVERSIFIER LES RESSOURCES & FINANCER 500+ LYCÉENS")
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(MX, hy + 17, "AMBITION CAMPUS  |  PLAN D'ACTION FINANCIER")
 
+    # Coordonnées / contact à droite
     c.setFillColor(HexColor("#94A3B8"))
-    c.setFont("Helvetica", 7.5)
+    c.setFont("Helvetica", 7.8)
     rx = W - MX
-    c.drawRightString(rx, hy + 31, "Document Stratégique Interne")
-    c.drawRightString(rx, hy + 15, "Modèle 100 % bénévole  •  1 € = 5,30 €")
+    c.drawRightString(rx, hy + 23, "ambitioncampus@gmail.com")
+    c.drawRightString(rx, hy + 11, "ambitioncampus.com")
 
     # ================================================================
     # 2. SCHÉMA GLOBAL DES FLUX (Hauteur: 58pt)
@@ -124,12 +120,12 @@ def generate_pdf():
         c.drawCentredString(cx + cap_w / 2, cap_y + 4, amount)
 
     # ================================================================
-    # 3. LES 4 GRANDS BLOCS MAXIMISÉS EN GRILLE 2x2 (Hauteur: 326pt par ligne)
+    # 3. LES 4 GRANDS BLOCS MAXIMISÉS EN GRILLE 2x2 (Hauteur: 336pt par ligne)
     # ================================================================
     grid_top = y_schema - 10
     col_gap = 10
     col_w = (CW - col_gap) / 2
-    row_h = 332  # Hauteur étendue pour remplir tout l'espace
+    row_h = 336  # Hauteur optimisée
     
     st_text = ParagraphStyle("txt", fontName="Helvetica", fontSize=7.4, leading=9.8, textColor=SLATE)
 
