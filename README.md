@@ -15,22 +15,24 @@ ambition-campus/
 │   ├── photo_equipe.png                      # Photo d'équipe originale
 │   └── photo_equipe_cropped.png              # Photo recadrée optimisée pour A4
 ├── docs/
-│   ├── pdf-presentation-ambition-campus.pdf  # PDF de présentation A4 (Externe / Financeurs)
-│   └── guide-financement-association.pdf     # Plan d'action financier A4 (Interne / 4 Piliers)
+│   ├── bilan-strategique-equipe-ambition-campus.pdf # PDF Bilan Interne 1 page A4 (Équipe)
+│   ├── pdf-presentation-ambition-campus.pdf  # PDF de présentation 1 page A4 (Financeurs / Partenaires)
+│   └── guide-financement-association.pdf     # Plan d'action financier 1 page A4 (4 Piliers)
 ├── prospection/
 │   ├── fondations/                           # PILIER 3 : 55 FONDATIONS QUALIFIÉES
 │   │   ├── RAPPORT_FONDATIONS_STRATEGIE.md   # Playbook & Cartographie des 55 fondations cibles
 │   │   ├── fondations_database.csv           # Master CSV Fondations (Import direct Google Sheets)
 │   │   ├── fondations_database.xlsx          # Master Excel Fondations stylisé avec filtres
-│   │   └── emails_generes/                   # 55 emails de prospection personnalisés prêts à l'envoi
+│   │   └── emails_generes/                   # 55 dossiers d'emails personnalisés (A/B/C testing)
 │   └── entreprises/                          # PILIER 2 : 48 ENTREPRISES QUALIFIÉES
 │       ├── RAPPORT_ENTREPRISES_MECENAT.md    # Playbook & Stratégie des 48 entreprises cibles
 │       ├── entreprises_database.csv          # Master CSV Entreprises (Import direct Google Sheets)
 │       ├── entreprises_database.xlsx         # Master Excel Entreprises stylisé avec filtres
-│       └── emails_generes/                   # 48 emails de prospection personnalisés prêts à l'envoi
+│       └── emails_generes/                   # 48 dossiers d'emails personnalisés (A/B/C testing)
 └── scripts/
-    ├── generate_fiche_resume.py              # Générateur du PDF de présentation A4
-    ├── generate_plan_financement.py          # Générateur du Guide Financement A4
+    ├── generate_bilan_equipe.py              # Générateur du PDF Bilan Stratégique 1 page A4
+    ├── generate_fiche_resume.py              # Générateur du PDF de présentation 1 page A4
+    ├── generate_plan_financement.py          # Générateur du Guide Financement 1 page A4
     ├── enrich_foundations.py                 # Générateur/Export Master 55 Fondations
     ├── generate_outreach_emails.py           # Générateur automatique des 55 emails fondations
     ├── enrich_entreprises.py                 # Générateur/Export Master 48 Entreprises
