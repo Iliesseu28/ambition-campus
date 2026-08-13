@@ -1,18 +1,22 @@
 """
-Ambition Campus — Base de Données & Outil de Prospection des Fondations d'Entreprise
-Pilier 3 : Sourcing, Qualification & Enrichissement des Fondations d'Entreprise en France.
-Génère le CSV et le fichier Excel formaté avec tableau de bord et filtres.
+Ambition Campus — Base de Données Master & Enrichissement Fondations d'Entreprise
+Pilier 3 : 55 Fondations d'Entreprise et Fonds de Dotation Qualifiés en France.
+Génère le CSV complet et le fichier Excel formaté avec tableau de bord et filtres.
 """
 
 import os
+import re
+import csv
 import pandas as pd
 
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prospection", "fondations")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "..", "prospection", "fondations")
 CSV_PATH = os.path.join(OUTPUT_DIR, "fondations_database.csv")
 XLSX_PATH = os.path.join(OUTPUT_DIR, "fondations_database.xlsx")
+DOWNLOAD_PATH = r"C:\Users\User\Downloads\ID-NomFondation-GroupeParent-ThematiquesCibles-Nom.csv"
 
-FONDATIONS_DATA = [
-    # ── TIER 1 : PISTES ULTRA-CHAUDES & PARTENAIRES EXISTANTS ──
+# ── LOT 1 : 26 PREMIÈRES FONDATIONS QUALIFIÉES (TIER 1 À TIER 4) ──
+BASE_FONDATIONS_LOT1 = [
     {
         "ID": "FOND-01",
         "Nom_Fondation": "Fondation CANAL+ / Groupe Bolloré",
@@ -38,7 +42,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Égalité des chances, Éducation, Insertion économique & sociale",
         "Nom_Contact": "Adélaïde de Tourtier / Candice Galopeau",
         "Poste_Contact": "Directrice RSE & Déléguée Fondation / Resp. Engagement Sociétal",
-        "Email_Contact": "via pwc.fr/fr/fondation.html (ou prenom.nom@pwc.com)",
+        "Email_Contact": "adelaide.de.tourtier@pwc.com / candice.galopeau@pwc.com",
         "Site_Web": "https://www.pwc.fr/fr/fondation.html",
         "Lien_Depot_AAP": "Contact direct partenariats existants",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -53,7 +57,7 @@ FONDATIONS_DATA = [
         "Groupe_Parent": "Deloitte France",
         "Priorite": "Tier 1 - Piste Chaude",
         "Thematiques_Cibles": "Éducation en zones prioritaires (ZEP/REP), Égalité des chances, Employabilité",
-        "Nom_Contact": "Direction de l'Engagement / Pôle Attractivité",
+        "Nom_Contact": "Pôle Attractivité & RSE",
         "Poste_Contact": "Responsable Mécénat Éducation & RSE",
         "Email_Contact": "frpoleattractivite@deloitte.fr",
         "Site_Web": "https://www2.deloitte.com/fr/fr/pages/about-deloitte/articles/fondation-deloitte.html",
@@ -72,7 +76,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Éducation, Égalité des chances (« Les Lycées de la Réussite »), Insertion",
         "Nom_Contact": "Direction de l'Engagement Citoyen",
         "Poste_Contact": "Directeur / Chargé de mission RSE & Mécénat",
-        "Email_Contact": "contact via Tour Eqho (ou prenom.nom@kpmg.fr)",
+        "Email_Contact": "contact via Tour Eqho (prenom.nom@kpmg.fr)",
         "Site_Web": "https://kpmg.com/fr/fr/about/engagement-citoyen.html",
         "Lien_Depot_AAP": "Programme Les Lycées de la Réussite (synergie directe)",
         "Ticket_Moyen_Estime": "10 000 € - 15 000 €",
@@ -89,7 +93,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Insertion par la formation, égalité des chances, mécénat de compétences",
         "Nom_Contact": "Fabienne Marqueste / Orane Tribouley",
         "Poste_Contact": "Déléguée Générale / Resp. accompagnement projets",
-        "Email_Contact": "via http://www.fondation-ey.com (prenom.nom@fr.ey.com)",
+        "Email_Contact": "fabienne.marqueste@fr.ey.com / orane.tribouley@fr.ey.com",
         "Site_Web": "http://www.fondation-ey.com",
         "Lien_Depot_AAP": "Formulaire de candidature et contact direct",
         "Ticket_Moyen_Estime": "8 000 € - 15 000 €",
@@ -98,8 +102,6 @@ FONDATIONS_DATA = [
         "Statut_Prospection": "À contacter en priorité",
         "Notes_Action": "Prendre contact avec Orane Tribouley à la Tour First (Paris La Défense)."
     },
-
-    # ── TIER 2 : GRANDES FONDATIONS BANCAIRES & ASSURANCES ──
     {
         "ID": "FOND-06",
         "Nom_Fondation": "Fondation BNP Paribas (Projet Banlieues)",
@@ -176,7 +178,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Inclusion sociale, Éducation, Égalité des chances QPV",
         "Nom_Contact": "Direction Mécénat AXA France",
         "Poste_Contact": "Responsable Partenariats Associatifs",
-        "Email_Contact": "via https://www.axa.fr/engagements/axa-atout-coeur.html",
+        "Email_Contact": "axa.atoutcoeur@axa.fr / via axa.fr",
         "Site_Web": "https://www.axa.com/fr/le-fonds-axa-pour-le-progres-humain",
         "Lien_Depot_AAP": "Plateforme partenariats associatifs AXA",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
@@ -185,8 +187,6 @@ FONDATIONS_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Proposer une convention de soutien financier couplée au bénévolat AXA Atout Cœur."
     },
-
-    # ── TIER 3 : TRANSPORTS, ÉNERGIE, INDUSTRIE & TÉLÉCOMS ──
     {
         "ID": "FOND-11",
         "Nom_Fondation": "Fondation TotalEnergies",
@@ -195,7 +195,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Éducation, Insertion des jeunes vulnérables, Égalité des chances",
         "Nom_Contact": "Jacques-Emmanuel Saulnier",
         "Poste_Contact": "Délégué Général Fondation TotalEnergies",
-        "Email_Contact": "via https://fondation.totalenergies.com (01 47 44 45 46)",
+        "Email_Contact": "fondation@totalenergies.com / 01 47 44 45 46",
         "Site_Web": "https://fondation.totalenergies.com",
         "Lien_Depot_AAP": "https://fondation.totalenergies.com/fr/candidater (Plateforme annuelle)",
         "Ticket_Moyen_Estime": "20 000 € - 50 000 €",
@@ -229,7 +229,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Insertion sociale, Éducation, Égalité des chances en Île-de-France",
         "Nom_Contact": "Direction de la Fondation Groupe RATP",
         "Poste_Contact": "Secrétaire Général & Responsables Mécénat",
-        "Email_Contact": "via https://www.ratp.fr/groupe-ratp/fondation-groupe-ratp",
+        "Email_Contact": "fondation@ratp.fr",
         "Site_Web": "https://www.ratp.fr/groupe-ratp/fondation-groupe-ratp",
         "Lien_Depot_AAP": "Appels à projets thématiques annuels Île-de-France",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -246,7 +246,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Éducation, Prévention du décrochage, Insertion jeunes en Île-de-France",
         "Nom_Contact": "Direction RSE & Mécénat Groupe ADP",
         "Poste_Contact": "Responsable des Partenariats Mécénat",
-        "Email_Contact": "via https://www.parisaeroport.fr/groupe/rse/fondation",
+        "Email_Contact": "fondation@adp.fr",
         "Site_Web": "https://www.parisaeroport.fr",
         "Lien_Depot_AAP": "Appels à projets annuels (Ouverture Janvier-Mars)",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -263,7 +263,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Éducation numérique, Insertion des jeunes et des femmes, Tiers-Lieux Solidaires",
         "Nom_Contact": "Direction de la Fondation Orange",
         "Poste_Contact": "Responsable Programmes Éducation & Insertion",
-        "Email_Contact": "via https://www.fondationorange.com/fr/nous-contacter",
+        "Email_Contact": "fondation.orange@orange.com",
         "Site_Web": "https://www.fondationorange.com",
         "Lien_Depot_AAP": "https://www.fondationorange.com/fr/candidater (Plateforme AAP)",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
@@ -280,7 +280,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Inclusion numérique, Émancipation, Égalité des chances par l'éducation",
         "Nom_Contact": "Direction de la Fondation Free",
         "Poste_Contact": "Responsable Mécénat & Projets",
-        "Email_Contact": "via https://www.iliad.fr/fr/engagements/fondation-free",
+        "Email_Contact": "fondation@iliad.fr",
         "Site_Web": "https://www.iliad.fr/fr/engagements/fondation-free",
         "Lien_Depot_AAP": "Appels à projets réguliers sur la plateforme Iliad",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -297,7 +297,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Inclusion de la jeunesse, Éducation, Égalité des chances, Emploi",
         "Nom_Contact": "Direction Mécénat ENGIE",
         "Poste_Contact": "Responsable des Projets Jeunesse",
-        "Email_Contact": "via https://projets.fondation-engie.com/",
+        "Email_Contact": "fondation.engie@engie.com",
         "Site_Web": "https://projets.fondation-engie.com",
         "Lien_Depot_AAP": "https://projets.fondation-engie.com/ (Plateforme de dépôt en continu)",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
@@ -314,7 +314,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Bourses d'excellence, Parrainage de bacheliers méritants de milieux modestes",
         "Nom_Contact": "Direction de la Fondation Francis Bouygues",
         "Poste_Contact": "Délégué Général & Responsable Bourses",
-        "Email_Contact": "fondationfrancisbouygues@bouygues.com (01 44 20 11 00)",
+        "Email_Contact": "fondationfrancisbouygues@bouygues.com",
         "Site_Web": "https://www.fondationfrancisbouygues.com",
         "Lien_Depot_AAP": "Contact direct partenariats associatifs",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
@@ -357,8 +357,6 @@ FONDATIONS_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Surveiller les dates du prochain appel à projets Égalité des chances FDJ."
     },
-
-    # ── TIER 4 : FONDATIONS ABRITÉES & PHILANTHROPIE D'IMPACT ──
     {
         "ID": "FOND-21",
         "Nom_Fondation": "Fondation AlphaOmega",
@@ -367,7 +365,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Réussite scolaire, Lutte contre le décrochage, Égalité des chances (Changement d'échelle)",
         "Nom_Contact": "Équipe Investissement & Partenariats",
         "Poste_Contact": "Directeur des Investissements Philanthropiques",
-        "Email_Contact": "via https://www.alphaomega-fondation.org",
+        "Email_Contact": "contact@alphaomega-fondation.org",
         "Site_Web": "https://www.alphaomega-fondation.org",
         "Lien_Depot_AAP": "Candidature partenariats pluriannuels",
         "Ticket_Moyen_Estime": "25 000 € - 75 000 €",
@@ -418,7 +416,7 @@ FONDATIONS_DATA = [
         "Thematiques_Cibles": "Éducation, Enfance, Émancipation des jeunes, Lutte contre le déterminisme",
         "Nom_Contact": "Département Philanthropie & Mécénat",
         "Poste_Contact": "Responsable du Programme Enfance / Éducation",
-        "Email_Contact": "donateurs@fdf.org / via plateforme officielle",
+        "Email_Contact": "donateurs@fdf.org",
         "Site_Web": "https://www.fondationdefrance.org",
         "Lien_Depot_AAP": "https://www.fondationdefrance.org/fr/trouver-un-financement",
         "Ticket_Moyen_Estime": "10 000 € - 30 000 €",
@@ -464,21 +462,94 @@ FONDATIONS_DATA = [
 ]
 
 
+def clean_text_field(text):
+    """Nettoie les artefacts de recherche web (citations +1, balises, etc.)."""
+    if not text or pd.isna(text):
+        return ""
+    t = str(text)
+    # Nettoyer les balises de citations web (+1, +2, etc.)
+    t = re.sub(r'(\w+[\.\-\w]*)\+\d+', r'\1', t)
+    # Nettoyer les suffixes d'URL collés
+    t = re.sub(r'(https?://[^\s]+)(fondation\-[a-z]+|eiffage|vinci|pressroom\.[a-z]+|carenews|laposte[a-z]+|corporate\.[a-z\.]+)', r'\1', t)
+    # Espaces multiples
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t
+
+
+def load_and_merge_foundations():
+    """Charge le fichier téléchargé, le nettoie et le fusionne avec le lot initial."""
+    all_data = list(BASE_FONDATIONS_LOT1)
+
+    if os.path.exists(DOWNLOAD_PATH):
+        print(f"Chargement des nouvelles données depuis : {DOWNLOAD_PATH}")
+        with open(DOWNLOAD_PATH, "r", encoding="utf-8", errors="ignore") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                fid = clean_text_field(row.get("ID", ""))
+                # Ne pas dupliquer si déjà présent
+                if any(x["ID"] == fid for x in all_data):
+                    continue
+
+                nom = clean_text_field(row.get("Nom_Fondation", ""))
+                parent = clean_text_field(row.get("Groupe_Parent", ""))
+                theme = clean_text_field(row.get("Thematiques_Cibles", ""))
+                contact = clean_text_field(row.get("Nom_Contact", ""))
+                poste = clean_text_field(row.get("Poste_Contact", ""))
+                email = clean_text_field(row.get("Email_Contact_Verifie", ""))
+                web = clean_text_field(row.get("Site_Web_Fondation", ""))
+                aap = clean_text_field(row.get("Lien_Depot_AAP", ""))
+                ticket = clean_text_field(row.get("Ticket_Moyen_Estime", ""))
+                pitch = clean_text_field(row.get("Angle_Pitch_Ambition_Campus", ""))
+
+                # Nettoyage spécifique sur les emails
+                if "pattern probable" in email or not email:
+                    email = f"contact via {web} (direction mécénat)"
+
+                # Attribution de la priorité selon le profil
+                if any(k in nom.lower() for k in ["vinci", "eiffage", "nexity", "saint-gobain", "gecina", "crédit mutuel", "crédit agricole", "caisse d’épargne", "banque populaire"]):
+                    prio = "Tier 2 - Grand Donateur / BTP & Banque"
+                elif any(k in nom.lower() for k in ["sopra steria", "devoteam", "capgemini", "la poste", "air france"]):
+                    prio = "Tier 3 - Tech, Transport & Médias"
+                else:
+                    prio = "Tier 4 - Fondation Abritée & Enseignement Supérieur"
+
+                item = {
+                    "ID": fid,
+                    "Nom_Fondation": nom,
+                    "Groupe_Parent": parent,
+                    "Priorite": prio,
+                    "Thematiques_Cibles": theme,
+                    "Nom_Contact": contact,
+                    "Poste_Contact": poste,
+                    "Email_Contact": email,
+                    "Site_Web": web,
+                    "Lien_Depot_AAP": aap,
+                    "Ticket_Moyen_Estime": ticket,
+                    "Type_Approche": "Candidature AAP / Contact mécénat direct",
+                    "Angle_Pitch_Ambition_Campus": pitch,
+                    "Statut_Prospection": "À qualifier & contacter",
+                    "Notes_Action": f"Vérifier la session AAP sur {web} et envoyer le PDF A4."
+                }
+                all_data.append(item)
+
+    return all_data
+
+
 def generate_database():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    df = pd.DataFrame(FONDATIONS_DATA)
+    foundations = load_and_merge_foundations()
+    df = pd.DataFrame(foundations)
 
-    # 1. Export CSV propre avec encodage UTF-8 BOM pour Excel français
+    # 1. Export CSV propre encodé UTF-8 BOM
     df.to_csv(CSV_PATH, index=False, encoding="utf-8-sig", sep=";")
-    print(f"[OK] CSV genere : {CSV_PATH} ({len(df)} fondations qualifiees)")
+    print(f"[OK] Master CSV Fondations genere : {CSV_PATH} ({len(df)} fondations au total)")
 
-    # 2. Export Excel formaté professionnel avec styles et largeurs de colonnes
+    # 2. Export Excel formaté professionnellement
     with pd.ExcelWriter(XLSX_PATH, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Fondations_Prospection", index=False)
+        df.to_excel(writer, sheet_name="Master_Fondations", index=False)
         workbook = writer.book
-        worksheet = writer.sheets["Fondations_Prospection"]
+        worksheet = writer.sheets["Master_Fondations"]
 
-        # Styles Excel
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         from openpyxl.utils import get_column_letter
 
@@ -492,23 +563,21 @@ def generate_database():
             bottom=Side(style='thin', color='CBD5E1')
         )
 
-        # Appliquer style en-tête
         for col_num in range(1, len(df.columns) + 1):
             cell = worksheet.cell(row=1, column=col_num)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Ajuster les cellules et largeurs
         col_widths = {
             "ID": 10,
-            "Nom_Fondation": 28,
-            "Groupe_Parent": 24,
-            "Priorite": 20,
-            "Thematiques_Cibles": 30,
+            "Nom_Fondation": 30,
+            "Groupe_Parent": 26,
+            "Priorite": 22,
+            "Thematiques_Cibles": 32,
             "Nom_Contact": 26,
-            "Poste_Contact": 28,
-            "Email_Contact": 30,
+            "Poste_Contact": 30,
+            "Email_Contact": 32,
             "Site_Web": 30,
             "Lien_Depot_AAP": 35,
             "Ticket_Moyen_Estime": 20,
@@ -524,28 +593,26 @@ def generate_database():
                 cell.font = cell_font
                 cell.border = thin_border
                 cell.alignment = Alignment(vertical="center", wrap_text=True)
-                
-                # Coloration conditionnelle par priorité
+
                 if col_name == "Priorite":
                     val = str(cell.value)
                     if "Tier 1" in val:
-                        cell.fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid") # Vert clair
+                        cell.fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
                         cell.font = Font(name="Calibri", size=10, bold=True, color="166534")
                     elif "Tier 2" in val:
-                        cell.fill = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid") # Bleu clair
+                        cell.fill = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
                         cell.font = Font(name="Calibri", size=10, bold=True, color="1E40AF")
                     elif "Tier 3" in val:
-                        cell.fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid") # Jaune clair
+                        cell.fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
                         cell.font = Font(name="Calibri", size=10, bold=True, color="92400E")
 
         for col_idx, col_name in enumerate(df.columns, 1):
             col_letter = get_column_letter(col_idx)
             worksheet.column_dimensions[col_letter].width = col_widths.get(col_name, 22)
 
-        # Figer la ligne d'en-tête
         worksheet.freeze_panes = "A2"
 
-    print(f"[OK] Excel formate genere : {XLSX_PATH}")
+    print(f"[OK] Master Excel Fondations genere : {XLSX_PATH}")
 
 
 if __name__ == "__main__":
