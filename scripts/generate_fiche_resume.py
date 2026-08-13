@@ -1,7 +1,7 @@
 """
-Ambition Campus — Fiche Résumé A4 (1 page)
-Toutes les données proviennent du document source.
-Design professionnel, plein cadre, sans espace vide.
+Ambition Campus - Fiche Resume A4 (1 page)
+Toutes les donnees proviennent du document source.
+Design professionnel, plein cadre, avec photo d'equipe.
 """
 
 from reportlab.lib.pagesizes import A4
@@ -13,7 +13,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 import os
 
-# ── Palette ──
+# -- Palette --
 NAVY       = HexColor("#14213D")
 GOLD       = HexColor("#C9A84C")
 GOLD_LIGHT = HexColor("#F8F1DD")
@@ -24,15 +24,17 @@ BORDER     = HexColor("#CBD5E1")
 WHITE      = white
 
 W, H = A4
-MX = 16 * mm  # marge horizontale
-CW = W - 2 * MX  # largeur utile
+MX = 16 * mm
+CW = W - 2 * MX
 
-OUTPUT_DIR  = os.path.join(os.path.dirname(__file__), "..", "docs")
+SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
+ASSET_DIR   = os.path.join(SCRIPT_DIR, "..", "assets")
+OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "..", "docs")
 OUTPUT_PATH = os.path.join(OUTPUT_DIR, "fiche-resume-association.pdf")
+PHOTO_PATH  = os.path.join(ASSET_DIR, "photo_equipe.png")
 
 
 def rr(c, x, y, w, h, r, fill=None, stroke=None, sw=0.5):
-    """Rectangle arrondi."""
     c.saveState()
     if fill:
         c.setFillColor(fill)
@@ -46,67 +48,99 @@ def rr(c, x, y, w, h, r, fill=None, stroke=None, sw=0.5):
 
 
 def section_head(c, x, y, text):
-    """Titre de section avec filet doré."""
     c.setFillColor(NAVY)
-    c.setFont("Helvetica-Bold", 9.5)
+    c.setFont("Helvetica-Bold", 9)
     c.drawString(x, y, text.upper())
-    tw = c.stringWidth(text.upper(), "Helvetica-Bold", 9.5)
+    tw = c.stringWidth(text.upper(), "Helvetica-Bold", 9)
     c.setStrokeColor(GOLD)
     c.setLineWidth(1.8)
     c.line(x, y - 3, x + tw + 4, y - 3)
-    return y - 6
+    return y - 5
 
 
 def generate_pdf():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     c = canvas.Canvas(OUTPUT_PATH, pagesize=A4)
 
-    # ════════════════════════════════════════════════════════
-    # HEADER — bandeau pleine largeur
-    # ════════════════════════════════════════════════════════
-    hh = 62
+    # ================================================================
+    # HEADER
+    # ================================================================
+    hh = 58
     hy = H - hh
     c.setFillColor(NAVY)
     c.rect(0, hy, W, hh, fill=1, stroke=0)
-
-    # filet doré bas
     c.setStrokeColor(GOLD)
     c.setLineWidth(2.5)
     c.line(0, hy, W, hy)
 
-    # Nom
     c.setFillColor(WHITE)
-    c.setFont("Helvetica-Bold", 24)
-    c.drawString(MX, hy + 28, "AMBITION CAMPUS")
-
-    # Sous-titre
+    c.setFont("Helvetica-Bold", 22)
+    c.drawString(MX, hy + 26, "AMBITION CAMPUS")
     c.setFillColor(GOLD)
-    c.setFont("Helvetica", 8.5)
-    c.drawString(MX, hy + 12, "Association loi 1901 / ESS  |  Active depuis 2008  |  100 % benevole")
+    c.setFont("Helvetica", 8)
+    c.drawString(MX, hy + 11, "Association loi 1901 / ESS  |  Active depuis 2008  |  100 % benevole")
 
-    # Contact droite
     c.setFillColor(HexColor("#94A3B8"))
-    c.setFont("Helvetica", 7.5)
+    c.setFont("Helvetica", 7)
     rx = W - MX
-    c.drawRightString(rx, hy + 40, "ambitioncampus@gmail.com")
-    c.drawRightString(rx, hy + 28, "06 98 99 62 00")
+    c.drawRightString(rx, hy + 38, "ambitioncampus@gmail.com")
+    c.drawRightString(rx, hy + 27, "06 98 99 62 00")
     c.drawRightString(rx, hy + 16, "ambitioncampus.com")
 
-    # ════════════════════════════════════════════════════════
+    # ================================================================
+    # PHOTO D'EQUIPE - pleine largeur sous le header
+    # ================================================================
+    y = hy
+    photo_h = 120  # hauteur de la bande photo
+    photo_y = y - photo_h
+
+    # Image source : 2500 x 1709 (ratio ~1.46)
+    img_ratio = 2500 / 1709
+    # On dessine sur toute la largeur du contenu
+    img_draw_w = CW
+    img_draw_h = img_draw_w / img_ratio
+
+    # Si l'image est plus haute que la bande, on la recadre visuellement
+    # en la centrant verticalement via clipping
+    if img_draw_h > photo_h:
+        # Clip pour ne montrer que la partie centrale
+        c.saveState()
+        clip_path = c.beginPath()
+        # Rectangle arrondi en bas pour le clip
+        clip_path.roundRect(MX, photo_y, CW, photo_h, 6)
+        clip_path.close()
+        c.clipPath(clip_path, stroke=0)
+        # Centrer l'image verticalement dans le clip
+        img_y = photo_y - (img_draw_h - photo_h) / 2
+        c.drawImage(PHOTO_PATH, MX, img_y, width=img_draw_w, height=img_draw_h,
+                     preserveAspectRatio=True, mask='auto')
+        c.restoreState()
+    else:
+        c.drawImage(PHOTO_PATH, MX, photo_y, width=img_draw_w, height=photo_h,
+                     preserveAspectRatio=True, mask='auto')
+
+    # Bordure arrondie par-dessus
+    c.saveState()
+    c.setStrokeColor(GOLD)
+    c.setLineWidth(1.2)
+    c.roundRect(MX, photo_y, CW, photo_h, 6, fill=0, stroke=1)
+    c.restoreState()
+
+    # ================================================================
     # DEVISE
-    # ════════════════════════════════════════════════════════
-    y = hy - 16
+    # ================================================================
+    y = photo_y - 14
     c.setFillColor(SLATE)
     c.setFont("Helvetica-BoldOblique", 9.5)
     c.drawCentredString(W / 2, y, "\xab Rendre la pareille, c\u2019est notre identite \xbb")
 
-    # ════════════════════════════════════════════════════════
-    # MISSION — bloc pleine largeur
-    # ════════════════════════════════════════════════════════
-    y -= 18
-    mission_h = 34
+    # ================================================================
+    # MISSION
+    # ================================================================
+    y -= 14
+    mission_h = 30
     rr(c, MX, y - mission_h, CW, mission_h, 4, fill=SURFACE, stroke=BORDER, sw=0.6)
-    sm = ParagraphStyle("m", fontName="Helvetica", fontSize=8, leading=11,
+    sm = ParagraphStyle("m", fontName="Helvetica", fontSize=7.5, leading=10,
                         textColor=SLATE, alignment=TA_JUSTIFY)
     mt = (
         "<b>Mission :</b> Lutter contre l\u2019autocensure et promouvoir l\u2019egalite des chances "
@@ -115,131 +149,117 @@ def generate_pdf():
     )
     p = Paragraph(mt, sm)
     p.wrapOn(c, CW - 14, 50)
-    p.drawOn(c, MX + 7, y - mission_h + 6)
+    p.drawOn(c, MX + 7, y - mission_h + 5)
 
-    # ════════════════════════════════════════════════════════
-    # CHIFFRES CLES — 6 KPI
-    # ════════════════════════════════════════════════════════
-    y = y - mission_h - 14
+    # ================================================================
+    # CHIFFRES CLES
+    # ================================================================
+    y = y - mission_h - 10
     y = section_head(c, MX, y, "Chiffres cles")
 
     kpis = [
-        ("500+",    "lyceens\naccompagnes / an"),
-        ("75",      "benevoles\nengages"),
-        ("525",     "binomes\nmentors actifs"),
-        ("36",      "lycees REP\nconventionnes"),
-        ("210+",    "oraux blancs\norganises"),
-        ("150+",    "evenements\npar an"),
+        ("500+",  "lyceens\naccompagnes / an"),
+        ("75",    "benevoles\nengages"),
+        ("525",   "binomes\nmentors actifs"),
+        ("36",    "lycees REP\nconventionnes"),
+        ("210+",  "oraux blancs\norganises"),
+        ("150+",  "evenements\npar an"),
     ]
-
     gap = 5
     bw = (CW - 5 * gap) / 6
-    bh = 46
+    bh = 42
     y -= 4
     by = y - bh
-
     for i, (num, lab) in enumerate(kpis):
         bx = MX + i * (bw + gap)
         rr(c, bx, by, bw, bh, 4, fill=NAVY)
-        # Chiffre
         c.setFillColor(GOLD)
-        c.setFont("Helvetica-Bold", 15)
-        c.drawCentredString(bx + bw / 2, by + bh - 18, num)
-        # Label
+        c.setFont("Helvetica-Bold", 14)
+        c.drawCentredString(bx + bw / 2, by + bh - 16, num)
         c.setFillColor(HexColor("#CBD5E1"))
-        c.setFont("Helvetica", 6)
-        lines = lab.split("\n")
-        for j, ln in enumerate(lines):
-            c.drawCentredString(bx + bw / 2, by + bh - 29 - j * 7.5, ln)
+        c.setFont("Helvetica", 5.8)
+        for j, ln in enumerate(lab.split("\n")):
+            c.drawCentredString(bx + bw / 2, by + bh - 27 - j * 7, ln)
 
-    # ════════════════════════════════════════════════════════
-    # DEUX COLONNES — Actions | Resultats
-    # ════════════════════════════════════════════════════════
-    y = by - 14
+    # ================================================================
+    # DEUX COLONNES
+    # ================================================================
+    y = by - 10
     col_gap = 12
     col_w = (CW - col_gap) / 2
     lx = MX
     rx_col = MX + col_w + col_gap
 
-    # ── COL GAUCHE : ACTIONS ──
+    # -- GAUCHE : ACTIONS --
     cy_l = section_head(c, lx, y, "Nos actions")
-
     actions = [
         ("Mentorat individuel",
-         "Accompagnement personnalise par des mentors (etudiants, professionnels, alumni) tout au long de l\u2019annee scolaire."),
-        ("Oraux blancs & preparation concours",
-         "Simulations d\u2019entretiens d\u2019admission pour les filieres selectives (Sciences Po, CPGE, etc.) devant des jurys de professionnels."),
+         "Accompagnement personnalise par des mentors (etudiants, professionnels, alumni) tout au long de l\u2019annee."),
+        ("Oraux blancs",
+         "Simulations d\u2019entretiens d\u2019admission pour Sciences Po, CPGE, etc. devant des jurys professionnels."),
         ("Ateliers d\u2019eloquence",
-         "Modules culture generale, decryptage de l\u2019actualite (AC Decrypte), eloquence (Ethos / Pathos / Logos) et concours annuel."),
+         "Culture generale, AC Decrypte, modules Ethos/Pathos/Logos et concours annuel d\u2019eloquence."),
         ("Immersions professionnelles",
-         "Visites d\u2019institutions et d\u2019entreprises : Assemblee nationale, Conseil d\u2019Etat, Station F, Google, tribunaux."),
+         "Visites : Assemblee nationale, Conseil d\u2019Etat, Station F, Google, tribunaux, masterclass."),
         ("Plaidoyer & Media",
          "Documentaire \xab Merite sous condition \xbb, podcast Radio Ambition Campus."),
     ]
-
-    st_t = ParagraphStyle("at", fontName="Helvetica-Bold", fontSize=7.5, leading=9.5, textColor=NAVY)
-    st_d = ParagraphStyle("ad", fontName="Helvetica", fontSize=6.8, leading=9, textColor=MUTED)
+    st_t = ParagraphStyle("at", fontName="Helvetica-Bold", fontSize=7, leading=9, textColor=NAVY)
+    st_d = ParagraphStyle("ad", fontName="Helvetica", fontSize=6.5, leading=8.5, textColor=MUTED)
 
     for title, desc in actions:
-        cy_l -= 5
-        # bullet doré
+        cy_l -= 4
         c.setFillColor(GOLD)
-        c.circle(lx + 3, cy_l - 1, 2, fill=1, stroke=0)
-        # titre
+        c.circle(lx + 3, cy_l - 1, 1.8, fill=1, stroke=0)
         pt = Paragraph(title, st_t)
-        pt.wrapOn(c, col_w - 14, 20)
-        pt.drawOn(c, lx + 10, cy_l - 5)
-        cy_l -= 10
-        # desc
+        pt.wrapOn(c, col_w - 12, 20)
+        pt.drawOn(c, lx + 10, cy_l - 4)
+        cy_l -= 9
         pd = Paragraph(desc, st_d)
-        pw, ph = pd.wrapOn(c, col_w - 14, 40)
+        pw, ph = pd.wrapOn(c, col_w - 12, 35)
         pd.drawOn(c, lx + 10, cy_l - ph + 2)
-        cy_l -= ph
+        cy_l -= ph - 1
 
-    # ── COL DROITE : RESULTATS 2026 ──
+    # -- DROITE : RESULTATS 2026 --
     cy_r = section_head(c, rx_col, y, "Resultats promotion 2026")
 
-    # Encart admissions
-    cy_r -= 6
-    res_h = 80
+    cy_r -= 5
+    res_h = 68
     rr(c, rx_col, cy_r - res_h, col_w, res_h, 5, fill=GOLD_LIGHT, stroke=GOLD, sw=0.8)
 
     admissions = [
-        ("21",  "admis a Sciences Po Paris"),
-        ("17",  "admis a La Sorbonne (Droit, Eco, Gestion, Histoire)"),
-        ("13",  "en prepas prestigieuses (Henri IV, Saint-Louis, Lakanal)"),
+        ("21", "admis a Sciences Po Paris"),
+        ("17", "admis a La Sorbonne (Droit, Eco, Gestion, Histoire)"),
+        ("13", "en prepas prestigieuses (Henri IV, Saint-Louis, Lakanal)"),
     ]
-
-    ry = cy_r - 15
+    ry = cy_r - 12
     for num, lab in admissions:
         c.setFillColor(NAVY)
-        c.setFont("Helvetica-Bold", 16)
+        c.setFont("Helvetica-Bold", 14)
         c.drawString(rx_col + 8, ry, num)
         c.setFillColor(SLATE)
-        c.setFont("Helvetica", 7.2)
-        c.drawString(rx_col + 32, ry + 2, lab)
-        ry -= 22
+        c.setFont("Helvetica", 6.8)
+        c.drawString(rx_col + 28, ry + 2, lab)
+        ry -= 19
 
-    cy_r = cy_r - res_h - 6
-
-    # Complements
-    st_c = ParagraphStyle("co", fontName="Helvetica", fontSize=7, leading=9.5, textColor=SLATE)
+    cy_r = cy_r - res_h - 5
+    st_c = ParagraphStyle("co", fontName="Helvetica", fontSize=6.5, leading=8.8, textColor=SLATE)
     comp = (
-        "<b>Autres admissions :</b> ESSEC, Dauphine, Assas, ecoles d\u2019ingenieurs, BTS/BUT.<br/>"
-        "<b>Note de satisfaction :</b> 9,2 / 10 (lyceens et mentors).<br/>"
-        "<b>Cout par lyceen :</b> 35 \u20ac / an (100 % terrain).<br/>"
-        "<b>Ratio d\u2019impact :</b> 1 \u20ac investi = 5,30 \u20ac de valeur d\u2019accompagnement."
+        "<b>Autres :</b> ESSEC, Dauphine, Assas, ecoles d\u2019ingenieurs, BTS/BUT.<br/>"
+        "<b>Satisfaction :</b> 9,2 / 10 (lyceens et mentors).<br/>"
+        "<b>Cout / lyceen :</b> 35 \u20ac / an (100 % terrain).<br/>"
+        "<b>Impact :</b> 1 \u20ac investi = 5,30 \u20ac de valeur d\u2019accompagnement."
     )
     pc = Paragraph(comp, st_c)
-    pw, ph = pc.wrapOn(c, col_w - 4, 60)
+    pw, ph = pc.wrapOn(c, col_w - 4, 50)
     pc.drawOn(c, rx_col + 2, cy_r - ph)
-    cy_r -= ph + 10
+    cy_r -= ph + 8
 
     # Implantations
     cy_r = section_head(c, rx_col, cy_r, "Implantations")
-    cy_r -= 6
+    cy_r -= 5
     antennes = [
-        "Paris (pole historique, Ile-de-France : 445 binomes)",
+        "Paris (pole historique, 445 binomes en IdF)",
         "Reims (antenne Grand Est)",
         "Poitiers (antenne Nouvelle-Aquitaine)",
         "Menton (antenne PACA)",
@@ -248,76 +268,69 @@ def generate_pdf():
         c.setFillColor(GOLD)
         c.circle(rx_col + 3, cy_r + 2, 1.5, fill=1, stroke=0)
         c.setFillColor(SLATE)
-        c.setFont("Helvetica", 7)
+        c.setFont("Helvetica", 6.5)
         c.drawString(rx_col + 10, cy_r, ant)
-        cy_r -= 11
+        cy_r -= 10
 
-    # ════════════════════════════════════════════════════════
+    # ================================================================
     # PARTENAIRES CONFIRMES
-    # ════════════════════════════════════════════════════════
-    bottom_y = min(cy_l, cy_r) - 10
+    # ================================================================
+    bottom_y = min(cy_l, cy_r) - 8
     bottom_y = section_head(c, MX, bottom_y, "Partenaires confirmes")
-
     bottom_y -= 4
-    part_h = 26
+    part_h = 22
     rr(c, MX, bottom_y - part_h, CW, part_h, 4, fill=SURFACE, stroke=BORDER, sw=0.6)
-
-    # Uniquement les partenaires cités comme tels dans le document source
-    partners = ["Sciences Po Paris", "PwC", "EY", "Deloitte", "KPMG", "Banque de France", "Assemblee nationale"]
+    partners = ["Sciences Po Paris", "PwC", "EY", "Deloitte", "KPMG",
+                "Banque de France", "Assemblee nationale"]
     ptxt = "   \u2022   ".join(partners)
-    sp = ParagraphStyle("pp", fontName="Helvetica", fontSize=7.5, leading=10, textColor=SLATE, alignment=TA_CENTER)
+    sp = ParagraphStyle("pp", fontName="Helvetica", fontSize=7, leading=9, textColor=SLATE, alignment=TA_CENTER)
     pp = Paragraph(ptxt, sp)
-    pp.wrapOn(c, CW - 16, 24)
-    pp.drawOn(c, MX + 8, bottom_y - part_h + 6)
+    pp.wrapOn(c, CW - 16, 22)
+    pp.drawOn(c, MX + 8, bottom_y - part_h + 5)
 
-    # ════════════════════════════════════════════════════════
+    # ================================================================
     # EQUIVALENCES DE DONS
-    # ════════════════════════════════════════════════════════
-    bottom_y = bottom_y - part_h - 12
+    # ================================================================
+    bottom_y = bottom_y - part_h - 10
     bottom_y = section_head(c, MX, bottom_y, "Equivalences de dons")
+    bottom_y -= 5
 
-    bottom_y -= 6
     dons = [
-        ("15 \u20ac", "Transport & collation pour 1 lyceen lors d\u2019une journee d\u2019orientation"),
-        ("35 \u20ac", "Accompagnement complet d\u20191 lyceen pendant toute une annee scolaire"),
-        ("100 \u20ac", "Materiel pedagogique et preparation aux oraux pour 3 lyceens"),
+        ("15 \u20ac", "Transport & collation pour\n1 lyceen, 1 journee d\u2019orientation"),
+        ("35 \u20ac", "Accompagnement complet\nd\u20191 lyceen pendant 1 annee scolaire"),
+        ("100 \u20ac", "Materiel pedagogique et\noraux pour 3 lyceens"),
     ]
-
     don_gap = 8
     don_w = (CW - 2 * don_gap) / 3
-    don_h = 44
+    don_h = 40
     don_y = bottom_y - don_h
 
     for i, (amount, desc) in enumerate(dons):
         dx = MX + i * (don_w + don_gap)
         rr(c, dx, don_y, don_w, don_h, 4, fill=WHITE, stroke=GOLD, sw=0.8)
-        # Montant
         c.setFillColor(NAVY)
-        c.setFont("Helvetica-Bold", 13)
-        c.drawCentredString(dx + don_w / 2, don_y + don_h - 15, amount)
-        # Desc
-        sd = ParagraphStyle("dd", fontName="Helvetica", fontSize=6.5, leading=8.2, textColor=MUTED, alignment=TA_CENTER)
-        pd = Paragraph(desc, sd)
-        pd.wrapOn(c, don_w - 10, 30)
-        pd.drawOn(c, dx + 5, don_y + 3)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(dx + don_w / 2, don_y + don_h - 14, amount)
+        c.setFillColor(MUTED)
+        c.setFont("Helvetica", 6)
+        lines = desc.split("\n")
+        for j, ln in enumerate(lines):
+            c.drawCentredString(dx + don_w / 2, don_y + don_h - 25 - j * 7.5, ln)
 
-    # ════════════════════════════════════════════════════════
+    # ================================================================
     # FOOTER
-    # ════════════════════════════════════════════════════════
-    fh = 22
+    # ================================================================
+    fh = 20
     c.setFillColor(NAVY)
     c.rect(0, 0, W, fh, fill=1, stroke=0)
-    # filet doré haut
     c.setStrokeColor(GOLD)
     c.setLineWidth(1.5)
     c.line(0, fh, W, fh)
-
     c.setFillColor(GOLD)
-    c.setFont("Helvetica-Bold", 7)
-    c.drawCentredString(W / 2, 8,
+    c.setFont("Helvetica-Bold", 6.5)
+    c.drawCentredString(W / 2, 7,
         "AMBITION CAMPUS   |   ambitioncampus@gmail.com   |   06 98 99 62 00   |   ambitioncampus.com")
 
-    # ── Sauvegarde ──
     c.save()
     print(f"[OK] PDF genere : {os.path.abspath(OUTPUT_PATH)}")
 
