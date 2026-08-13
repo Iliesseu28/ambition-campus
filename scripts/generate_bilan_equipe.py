@@ -1,6 +1,6 @@
 """
-Ambition Campus — Générateur du PDF Bilan Stratégique pour l'Équipe (1 Page A4 Aérée & Stylisée)
-Version aérée, élégante et visuellement optimisée avec typographie soignée et respirations claires.
+Ambition Campus — Générateur du PDF Bilan Stratégique pour l'Équipe (1 Page A4 - Sans Estimation Financière)
+Version épurée, aérée et réaliste : suppression de toute estimation financière spéculative, focus sur les livrables concrets et le plan d'action.
 """
 
 import os
@@ -15,7 +15,7 @@ from pypdf import PdfReader
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PDF = os.path.join(SCRIPT_DIR, "..", "docs", "bilan-strategique-equipe-ambition-campus.pdf")
 
-# Palette graphique épurée et moderne
+# Palette graphique corporate, épurée et moderne
 NAVY = colors.HexColor("#0F1E36")        # Bleu nuit profond
 NAVY_LIGHT = colors.HexColor("#1E293B")
 GOLD = colors.HexColor("#D97706")        # Ambre vif
@@ -107,27 +107,17 @@ def generate_bilan_pdf():
         alignment=1
     )
 
-    pill_lbl = ParagraphStyle(
-        'PillLbl',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=6.5,
-        leading=8,
-        textColor=TEXT_MUTED,
-        alignment=1
-    )
-
     story = []
 
-    # ── 1. HEADER ÉPURÉ & AÉRÉ ──
+    # ── 1. HEADER ÉPURÉ (SANS ESTIMATION D'ARGENT) ──
     header_data = [
         [
-            Paragraph("<b>AMBITION CAMPUS</b> <font color='#64748B'>•</font> <b>BILAN DE PROSPECTION & PLAN DE FINANCEMENT</b>", title_style),
+            Paragraph("<b>AMBITION CAMPUS</b> <font color='#64748B'>•</font> <b>BILAN DE PROSPECTION & PLAN D'ACTION</b>", title_style),
             Paragraph("<font color='#D97706'><b>PROMOTION 2026-2027</b></font>", ParagraphStyle('HRight', parent=title_style, fontSize=8, leading=10, alignment=2))
         ],
         [
-            Paragraph("Note de synthèse interne présentée par <b>Ilias Khafague</b> pour l'équipe • Ambition : <b>60k€ à 120k€ de budget</b>", subtitle_style),
-            Paragraph("Modèle 100 % bénévole • 1 € = 5,30 € d'impact", ParagraphStyle('SubR', parent=subtitle_style, alignment=2, fontName='Helvetica-Bold', textColor=NAVY))
+            Paragraph("Note de cadrage opérationnelle présentée par <b>Ilias Khafague</b> pour l'équipe Ambition Campus.", subtitle_style),
+            Paragraph("Modèle 100 % bénévole • 1 € = 5,30 € d'impact social", ParagraphStyle('SubR', parent=subtitle_style, alignment=2, fontName='Helvetica-Bold', textColor=NAVY))
         ]
     ]
     t_header = Table(header_data, colWidths=[385, 166])
@@ -141,7 +131,7 @@ def generate_bilan_pdf():
     story.append(t_header)
     story.append(Spacer(1, 4))
 
-    # ── 2. BANDEAU DES 6 CHIFFRES CLÉS (AÉRÉ AVEC CARTOUCHES) ──
+    # ── 2. BANDEAU DES 6 CHIFFRES CLÉS RÉELS ──
     pills_data = [[
         Paragraph("<b>17 ans</b><br/><font color='#64748B'>Actif depuis 2008</font>", pill_val),
         Paragraph("<b>100 % Bénévole</b><br/><font color='#64748B'>0 € frais admin</font>", pill_val),
@@ -162,7 +152,7 @@ def generate_bilan_pdf():
     story.append(t_pills)
     story.append(Spacer(1, 6))
 
-    # ── 3. SECTION 1 : LES 4 PILIERS DE FINANCEMENT (4 CARTES ESPACÉES) ──
+    # ── 3. SECTION 1 : LES 4 PILIERS DE FINANCEMENT (SANS ESTIMATION DE MONTANT) ──
     story.append(Paragraph("<b>1. ARCHITECTURE STRATÉGIQUE DES 4 PILIERS DE FINANCEMENT</b>", sec_title))
     story.append(Spacer(1, 3))
 
@@ -174,10 +164,10 @@ def generate_bilan_pdf():
             Paragraph("<b>PILIER 4 : DONS PARTICULIERS</b>", ParagraphStyle('P4', parent=body_bold, textColor=PURPLE_TEXT, fontSize=7)),
         ],
         [
-            Paragraph("• <b>Région Île-de-France</b> : Dossier 7k€ déposé.<br/>• <b>Mairies & Cités Éducatives</b> : Subventions QPV.<br/>• <b>FDVA</b> : Subventions formation bénévoles.<br/><b>Ticket visé : 5k€ à 15k€ / dossier</b>", body),
-            Paragraph("• <b>48 Entreprises & Cabinets ciblés</b> (Big 4, Banques, Avocats d'Affaires, Tech, CAC 40).<br/>• <b>Levier fiscal majeur : 60 % déduction IS</b>.<br/><b>Ticket visé : 10k€ à 30k€ / mécène</b>", body),
-            Paragraph("• <b>55 Fondations qualifiées</b> (Bolloré/Canal+, BNP Projet Banlieues, VINCI, Total, etc.).<br/>• <b>Appels à projets & bourses de parrainage</b>.<br/><b>Ticket visé : 15k€ à 40k€ / fondation</b>", body),
-            Paragraph("• <b>Campagne HelloAsso & LinkedIn</b>.<br/>• <b>Formule impact</b> : <i>35 € = 1 lycéen par an</i>.<br/>• <b>Déduction fiscale : 66 % sur l'IR</b>.<br/><b>Objectif : 10k€ à 20k€ / an</b>", body),
+            Paragraph("• <b>Région Île-de-France</b> : Dossier 7k€ déposé.<br/>• <b>Mairies & Cités Éducatives</b> : Subventions locales territoriales (QPV).<br/>• <b>FDVA</b> : Dépôt Le Compte Asso (formation des bénévoles et matériel).", body),
+            Paragraph("• <b>48 Entreprises & Cabinets ciblés</b> (Big 4, Banques, Avocats d'Affaires, Tech, CAC 40).<br/>• <b>Levier fiscal majeur : 60 % déduction IS</b> (Loi Aillagon - Art. 238 bis CGI).<br/>• <b>Partenariats oraux & jurys VIP</b>.", body),
+            Paragraph("• <b>55 Fondations d'entreprise qualifiées</b> (Bolloré/Canal+, BNP, VINCI, Total, etc.).<br/>• <b>Appels à projets thématiques</b>.<br/>• <b>Parrainage annuel de promotions</b> et bourses d'excellence sociale.", body),
+            Paragraph("• <b>Campagne HelloAsso & LinkedIn</b>.<br/>• <b>Formule d'impact direct</b> : <i>35 € = 1 lycéen accompagné pendant 1 an</i>.<br/>• <b>Avantage fiscal : 66 % de déduction sur l'impôt sur le revenu (IR)</b>.", body),
         ]
     ]
     t_piliers = Table(piliers_data, colWidths=[137, 138, 138, 138])
@@ -198,7 +188,7 @@ def generate_bilan_pdf():
     story.append(t_piliers)
     story.append(Spacer(1, 6))
 
-    # ── 4. SECTION 2 : AUDIT DU PIPELINE DES 103 CIBLES QUALIFIÉES ──
+    # ── 4. SECTION 2 : AUDIT DU PIPELINE DES 103 CIBLES QUALIFIÉES (3 COLONNES AÉRÉES) ──
     story.append(Paragraph("<b>2. AUDIT DU PIPELINE : 103 STRUCTURES QUALIFIÉES & CRM PRÊT À L'EMPLOI</b>", sec_title))
     story.append(Spacer(1, 3))
 
@@ -206,29 +196,25 @@ def generate_bilan_pdf():
         [
             Paragraph("<b>PÔLE / SECTEUR</b>", body_bold),
             Paragraph("<b>NB CIBLES</b>", body_bold),
-            Paragraph("<b>STRUCTURES QUALIFIÉES (DÉCISIONNAIRES, EMAILS & PROFILS IDENTIFIÉS)</b>", body_bold),
-            Paragraph("<b>POTENTIEL</b>", body_bold),
+            Paragraph("<b>STRUCTURES QUALIFIÉES & DÉCISIONNAIRES EN BASE (AVEC EMAILS ET MODALITÉS)</b>", body_bold),
         ],
         [
             Paragraph("<b>Fondations d'Entreprise</b><br/><font color='#64748B'>Pilier 3</font>", body),
-            Paragraph("<b>55</b> fond.", body_bold),
-            Paragraph("• <b>Pistes Chaudes</b> : Canal+/Bolloré (Marine Schenfele), PwC, Deloitte, KPMG, EY.<br/>• <b>Banques & BTP</b> : BNP (Projet Banlieues), Société Générale, MAIF, BPCE, VINCI, Eiffage.<br/>• <b>Tech & Industrie</b> : TotalEnergies, SNCF, RATP, ADP, Orange, Free, Sopra Steria, Devoteam.<br/>• <b>Venture Philanthropy</b> : AlphaOmega, Break Poverty, FACE, Carasso, Dauphine, Polytechnique.", body),
-            Paragraph("<b>150k€ à<br/>250k€</b>", ParagraphStyle('Pot1', parent=body_bold, textColor=NAVY, alignment=1)),
+            Paragraph("<b>55</b> fondations", body_bold),
+            Paragraph("• <b>Pistes Chaudes</b> : Canal+/Bolloré (Marine Schenfele), PwC, Deloitte, KPMG, EY.<br/>• <b>Banques & BTP</b> : BNP (Projet Banlieues), Société Générale, MAIF, BPCE, VINCI, Eiffage, Nexity, Saint-Gobain.<br/>• <b>Tech & Industrie</b> : TotalEnergies, SNCF, RATP, ADP, Orange, Free, Sopra Steria, Devoteam, Capgemini.<br/>• <b>Venture Philanthropy & Écoles</b> : AlphaOmega, Break Poverty, FACE, Carasso, Ponts, Dauphine, Polytechnique.", body),
         ],
         [
             Paragraph("<b>Mécénat Privé d'Entreprise</b><br/><font color='#64748B'>Pilier 2</font>", body),
-            Paragraph("<b>48</b> entr.", body_bold),
-            Paragraph("• <b>Audit & Stratégie</b> : Big 4, Mazars, BCG, McKinsey, Sia Partners, BearingPoint, Oliver Wyman.<br/>• <b>Finance & PE</b> : Banque de France, CACIB, BPCE, Lazard, Rothschild, Eurazeo, Tikehau, Ardian.<br/>• <b>Avocats d'Affaires (Droit)</b> : Gide, August Debouzy, Clifford Chance, Linklaters, Bredin Prat, Darrois.<br/>• <b>Tech, Luxe & CAC 40</b> : Google, Microsoft, Amazon, TF1, L'Oréal, LVMH, Danone, Schneider.", body),
-            Paragraph("<b>180k€ à<br/>300k€</b>", ParagraphStyle('Pot2', parent=body_bold, textColor=NAVY, alignment=1)),
+            Paragraph("<b>48</b> entreprises", body_bold),
+            Paragraph("• <b>Audit & Stratégie</b> : Big 4, Mazars, BCG, McKinsey, Sia Partners, BearingPoint, Oliver Wyman, Roland Berger.<br/>• <b>Finance & PE</b> : Banque de France, CACIB, BPCE, Lazard, Rothschild, Eurazeo, Tikehau, Ardian, Amundi, ODDO.<br/>• <b>Avocats d'Affaires (Droit)</b> : Gide, August Debouzy, Clifford Chance, Linklaters, Bredin Prat, Darrois, White & Case.<br/>• <b>Tech, Luxe & CAC 40</b> : Google, Microsoft, Amazon, TF1, L'Oréal, LVMH, Danone, Schneider Electric, Bouygues.", body),
         ],
         [
             Paragraph("<b>TOTAL QUALIFIÉ</b>", ParagraphStyle('TotT', parent=body_bold, textColor=GOLD)),
             Paragraph("<b>103 cibles</b>", ParagraphStyle('TotN', parent=body_bold, textColor=GOLD)),
-            Paragraph("<b>Livrables disponibles</b> : Master CSV (Google Sheets), Excel stylisé avec filtres sectoriels et <b>103 dossiers d'emails personnalisés (A/B/C) rédigés et prêts à l'envoi</b>.", body),
-            Paragraph("<b>330k€ à<br/>550k€</b>", ParagraphStyle('TotP', parent=body_bold, textColor=GOLD, alignment=1)),
+            Paragraph("<b>Livrables disponibles</b> : Master CSV (Google Sheets), Excel stylisé avec filtres sectoriels, et <b>103 dossiers d'emails personnalisés (A/B/C testing) rédigés et prêts à l'envoi</b> dans le dossier du projet.", body),
         ]
     ]
-    t_pipe = Table(pipe_data, colWidths=[108, 55, 298, 90])
+    t_pipe = Table(pipe_data, colWidths=[120, 60, 371])
     t_pipe.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F1F5F9")),
         ('BACKGROUND', (0,1), (-1,2), SLATE_BG),
@@ -237,8 +223,8 @@ def generate_bilan_pdf():
         ('INNERGRID', (0,0), (-1,-1), 0.5, BORDER),
         ('TOPPADDING', (0,0), (-1,-1), 2.5),
         ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
-        ('LEFTPADDING', (0,0), (-1,-1), 4),
-        ('RIGHTPADDING', (0,0), (-1,-1), 4),
+        ('LEFTPADDING', (0,0), (-1,-1), 4.5),
+        ('RIGHTPADDING', (0,0), (-1,-1), 4.5),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
     story.append(t_pipe)
@@ -255,7 +241,7 @@ def generate_bilan_pdf():
             Paragraph("<b>VARIANTE C : TALENTS & MARQUE EMPLOYEUR</b>", ParagraphStyle('VC', parent=body_bold, textColor=NAVY, fontSize=7)),
         ],
         [
-            Paragraph("• <b>Accroche</b> : <i>« 1 € investi = 5,30 € d'impact direct »</i>.<br/>• <b>Argument</b> : Bilan chiffré net (21 Sciences Po, 17 Sorbonne, 13 Prépas, coût net 35€/jeune) et levier 60% IS.<br/>• <b>Cible idéale</b> : DAF, Directeurs RSE analytiques, Banques.", body),
+            Paragraph("• <b>Accroche</b> : <i>« 1 € investi = 5,30 € d'impact direct »</i>.<br/>• <b>Argument</b> : Bilan chiffré net (21 Sciences Po, 17 Sorbonne, 13 Prépas, coût net 35€/jeune) et levier fiscal de 60% IS.<br/>• <b>Cible idéale</b> : DAF, Directeurs RSE analytiques, Banques.", body),
             Paragraph("• <b>Accroche</b> : <i>« PwC, Deloitte, Banque de France : nos mécènes »</i>.<br/>• <b>Argument</b> : Valorise l'implication de pairs prestigieux et propose une convention annuelle officielle de mécénat.<br/>• <b>Cible idéale</b> : Big 4, cabinets de conseil, CAC 40.", body),
             Paragraph("• <b>Accroche</b> : <i>« Briser l'autocensure : accéder aux talents d'élite »</i>.<br/>• <b>Argument</b> : Focus sur les modules d'éloquence, la diversité sociale et le vivier de recrutement direct.<br/>• <b>Cible idéale</b> : DRH, Responsables Recrutement & Droit.", body),
         ]
@@ -328,7 +314,7 @@ def generate_bilan_pdf():
     if nb_pages != 1:
         print(f"[ATTENTION] Le PDF depasse 1 page ({nb_pages} pages) !")
     else:
-        print("[SUCCES] CONTRAINTE VALIDEE : Exactement 1 page A4.")
+        print("[SUCCES] CONTRAINTE VALIDEE : Exactement 1 page A4 sans estimation d'argent.")
 
 
 if __name__ == "__main__":
