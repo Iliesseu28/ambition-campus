@@ -6,7 +6,7 @@ Association Loi 1901 / ESS active depuis 2008, 100 % bénévole, accompagnant pl
 
 ---
 
-## 📁 Architecture Complète du Projet
+## 📁 Architecture Complète du Projet (103 Partenaires Qualifiés)
 
 ```text
 ambition-campus/
@@ -18,23 +18,23 @@ ambition-campus/
 │   ├── pdf-presentation-ambition-campus.pdf  # PDF de présentation A4 (Externe / Financeurs)
 │   └── guide-financement-association.pdf     # Plan d'action financier A4 (Interne / 4 Piliers)
 ├── prospection/
-│   ├── fondations/                           # PILIER 3 : FONDATIONS D'ENTREPRISE
-│   │   ├── RAPPORT_FONDATIONS_STRATEGIE.md   # Playbook & Stratégie des 26 fondations cibles
-│   │   ├── fondations_database.csv           # Base CSV (Import immédiat Google Sheets)
-│   │   ├── fondations_database.xlsx          # Tableau de bord Excel stylisé avec filtres
-│   │   └── emails_generes/                   # 26 emails de prospection personnalisés prêts à l'envoi
-│   └── entreprises/                          # PILIER 2 : MÉCÉNAT PRIVÉ D'ENTREPRISE
-│       ├── RAPPORT_ENTREPRISES_MECENAT.md    # Playbook & Stratégie des 26 entreprises cibles
-│       ├── entreprises_database.csv          # Base CSV Mécénat (Import immédiat Google Sheets)
-│       ├── entreprises_database.xlsx         # Tableau de bord Excel stylisé avec filtres sectoriels
-│       └── emails_generes/                   # 26 emails de prospection personnalisés prêts à l'envoi
+│   ├── fondations/                           # PILIER 3 : 55 FONDATIONS QUALIFIÉES
+│   │   ├── RAPPORT_FONDATIONS_STRATEGIE.md   # Playbook & Cartographie des 55 fondations cibles
+│   │   ├── fondations_database.csv           # Master CSV Fondations (Import direct Google Sheets)
+│   │   ├── fondations_database.xlsx          # Master Excel Fondations stylisé avec filtres
+│   │   └── emails_generes/                   # 55 emails de prospection personnalisés prêts à l'envoi
+│   └── entreprises/                          # PILIER 2 : 48 ENTREPRISES QUALIFIÉES
+│       ├── RAPPORT_ENTREPRISES_MECENAT.md    # Playbook & Stratégie des 48 entreprises cibles
+│       ├── entreprises_database.csv          # Master CSV Entreprises (Import direct Google Sheets)
+│       ├── entreprises_database.xlsx         # Master Excel Entreprises stylisé avec filtres
+│       └── emails_generes/                   # 48 emails de prospection personnalisés prêts à l'envoi
 └── scripts/
     ├── generate_fiche_resume.py              # Générateur du PDF de présentation A4
     ├── generate_plan_financement.py          # Générateur du Guide Financement A4
-    ├── enrich_foundations.py                 # Générateur/Export de la base de données fondations
-    ├── generate_outreach_emails.py           # Générateur automatique des emails fondations
-    ├── enrich_entreprises.py                 # Générateur/Export de la base de données entreprises
-    └── generate_entreprises_emails.py        # Générateur automatique des emails entreprises
+    ├── enrich_foundations.py                 # Générateur/Export Master 55 Fondations
+    ├── generate_outreach_emails.py           # Générateur automatique des 55 emails fondations
+    ├── enrich_entreprises.py                 # Générateur/Export Master 48 Entreprises
+    └── generate_entreprises_emails.py        # Générateur automatique des 48 emails entreprises
 ```
 
 ---
@@ -51,11 +51,11 @@ ambition-campus/
 
 ---
 
-## 🏛️ Les 4 Piliers de Financement
+## 🏛️ Les 4 Piliers de Financement & Potentiel
 
 1. **Pilier 1 — Fonds Publics & Subventions** (Région IDF 7k€, Mairies, Cités Éducatives DAUPHIN BOP 147, FDVA).
-2. **Pilier 2 — Mécénat Privé d'Entreprise** (PwC, EY, Deloitte, KPMG, Mazars, Banque de France, Gide, Google - Déduction 60% IS).
-3. **Pilier 3 — Fondations d'Entreprise** (Fondation Bolloré via Canal+, BNP Projet Banlieues, TotalEnergies, etc.).
+2. **Pilier 2 — Mécénat Privé d'Entreprise** (48 entreprises qualifiées : Big 4, banques, cabinets d'avocats, tech, CAC 40 - Déduction 60% IS).
+3. **Pilier 3 — Fondations d'Entreprise** (55 fondations qualifiées : Canal+/Bolloré, BNP, SocGen, TotalEnergies, VINCI, etc.).
 4. **Pilier 4 — Cagnotte & Dons Particuliers** (Campagne HelloAsso LinkedIn, formule 35€ = 1 lycéen / an, Déduction 66% IR).
 
 ---

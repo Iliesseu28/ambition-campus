@@ -1,9 +1,10 @@
 """
 Ambition Campus — Générateur Automatique d'Emails de Prospection Mécénat Privé d'Entreprise
-Permet de générer en un clic des emails d'approche personnalisés pour chacune des 26 entreprises cibles.
+Permet de générer en un clic des emails d'approche personnalisés pour chacune des 48 entreprises de la base.
 """
 
 import os
+import re
 import pandas as pd
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,16 +22,16 @@ def generate_emails():
     print(f"Chargement de {len(df)} entreprises...")
 
     for idx, row in df.iterrows():
-        eid = row["ID"]
-        name = row["Nom_Entreprise"]
-        secteur = row["Secteur_Activite"]
-        contact = row["Nom_Contact"]
-        poste = row["Poste_Contact"]
-        email = row["Email_Contact"]
-        pitch = row["Angle_Pitch_Ambition_Campus"]
-        ticket = row["Ticket_Moyen_Estime"]
-        prio = row["Priorite"]
-        fiscal = row["Levier_Fiscal_60pct"]
+        eid = str(row.get("ID", f"ENT-{idx+1}"))
+        name = str(row.get("Nom_Entreprise", "Entreprise"))
+        secteur = str(row.get("Secteur_Activite", "Secteur Privé"))
+        contact = str(row.get("Nom_Contact", "Madame, Monsieur"))
+        poste = str(row.get("Poste_Contact", "Direction RSE & Mécénat"))
+        email = str(row.get("Email_Contact", "rse@entreprise.com"))
+        pitch = str(row.get("Angle_Pitch_Ambition_Campus", ""))
+        ticket = str(row.get("Ticket_Moyen_Estime", "10 000 € - 20 000 €"))
+        prio = str(row.get("Priorite", "Tier 2"))
+        fiscal = str(row.get("Levier_Fiscal_60pct", "Déduction 60% IS (Art. 238 bis CGI)"))
 
         email_content = f"""================================================================================
 FICHE ENTREPRISE : {name} ({eid})
@@ -48,7 +49,7 @@ Je me permets de vous contacter au nom de l'association Ambition Campus (Loi 190
 
 Au vu des engagements de {name} en matière de RSE, d'inclusion et d'ouverture des carrières d'excellence, nous serions ravis d'échanger sur une potentielle convention de mécénat pour l'année scolaire 2026-2027.
 
-Ambition Campus accompagne chaque année plus de 500 lycéens issus de quartiers populaires (QPV / 36 lycées REP) vers les filières sélectives de l'enseignement supérieur (Sciences Po, CPGE, La Sorbonne, Assas, Dauphine, écoles d'ingénieurs).
+Ambition Campus accompagne chaque année plus de 500 lycéens issus de milieux populaires (QPV / 36 lycées REP) vers les filières sélectives de l'enseignement supérieur (Sciences Po, CPGE, La Sorbonne, Assas, Dauphine, écoles de commerce et d'ingénieurs).
 
 Nos résultats d'admissions 2026 :
 • 21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes préparatoires d'élite (Henri IV, Saint-Louis, Lakanal).
@@ -70,7 +71,8 @@ L'Équipe Partenariats & Mécénat
 Ambition Campus
 📧 ambitioncampus@gmail.com | 📞 06 98 99 62 00 | 🌐 ambitioncampus.com
 """
-        filename = f"{eid}_{name.replace(' ', '_').replace('/', '_')[:30]}.txt"
+        clean_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', name)[:30]
+        filename = f"{eid}_{clean_name}.txt"
         file_path = os.path.join(OUT_DIR, filename)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(email_content)

@@ -1,18 +1,22 @@
 """
-Ambition Campus — Base de Données & Outil de Prospection Mécénat Privé d'Entreprise
-Pilier 2 : Sourcing, Qualification & Enrichissement des Entreprises Partenaires en France.
-Génère le CSV et le fichier Excel formaté avec tableau de bord et filtres par secteur.
+Ambition Campus — Base de Données Master & Enrichissement Mécénat Privé d'Entreprise
+Pilier 2 : 48 Entreprises Cibles de Mécénat Direct en France.
+Génère le CSV complet et le fichier Excel formaté avec tableau de bord et filtres sectoriels.
 """
 
 import os
+import re
+import csv
 import pandas as pd
 
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prospection", "entreprises")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "..", "prospection", "entreprises")
 CSV_PATH = os.path.join(OUTPUT_DIR, "entreprises_database.csv")
 XLSX_PATH = os.path.join(OUTPUT_DIR, "entreprises_database.xlsx")
+DOWNLOAD_PATH = r"C:\Users\User\Downloads\ID-NomEntreprise-SecteurActivite-NomContactDecideu.csv"
 
-ENTREPRISES_DATA = [
-    # ── SECTEUR 1 : AUDIT, CONSEIL & STRATÉGIE ──
+# ── LOT 1 : 26 PREMIÈRES ENTREPRISES QUALIFIÉES (TIER 1 À TIER 3) ──
+BASE_ENTREPRISES_LOT1 = [
     {
         "ID": "ENT-01",
         "Nom_Entreprise": "PwC France et Maghreb",
@@ -54,7 +58,7 @@ ENTREPRISES_DATA = [
         "Priorite": "Tier 1 - Partenaire Historique",
         "Nom_Contact": "Direction Engagement Citoyen",
         "Poste_Contact": "Directeur Engagement Citoyen & Inclusion",
-        "Email_Contact": "via Tour Eqho Courbevoie (prenom.nom@kpmg.fr)",
+        "Email_Contact": "contact via Tour Eqho Courbevoie (prenom.nom@kpmg.fr)",
         "LinkedIn_Contact": "https://www.linkedin.com/company/kpmg-france",
         "Site_Web": "https://kpmg.com/fr/fr/about/engagement-citoyen.html",
         "Ticket_Moyen_Estime": "10 000 € - 15 000 €",
@@ -149,8 +153,6 @@ ENTREPRISES_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Envoyer le pitch à fro_projet@mckinsey.com (35 bd des Invalides, Paris 7e)."
     },
-
-    # ── SECTEUR 2 : BANQUES D'AFFAIRES, BANQUES & ASSURANCES ──
     {
         "ID": "ENT-09",
         "Nom_Entreprise": "Banque de France",
@@ -253,8 +255,6 @@ ENTREPRISES_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Cibler le département Sustainability au 23 bis avenue de Messine (Paris 8e)."
     },
-
-    # ── SECTEUR 3 : GRANDS CABINETS D'AVOCATS D'AFFAIRES (DROIT) ──
     {
         "ID": "ENT-15",
         "Nom_Entreprise": "Gide Loyrette Nouel",
@@ -323,8 +323,6 @@ ENTREPRISES_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Prendre contact avec l'équipe RSE au 25 rue de Marignan (Paris 8e)."
     },
-
-    # ── SECTEUR 4 : TECH, MÉDIAS & TÉLÉCOMS ──
     {
         "ID": "ENT-19",
         "Nom_Entreprise": "Google France",
@@ -393,8 +391,6 @@ ENTREPRISES_DATA = [
         "Statut_Prospection": "À contacter",
         "Notes_Action": "Proposer aux journalistes/présentateurs de TF1 d'animer une masterclass éloquence."
     },
-
-    # ── SECTEUR 5 : INDUSTRIE, LUXE & GRANDE DISTRIBUTION ──
     {
         "ID": "ENT-23",
         "Nom_Entreprise": "L'Oréal France (Direction RSE)",
@@ -466,19 +462,95 @@ ENTREPRISES_DATA = [
 ]
 
 
+def clean_text_field(text):
+    """Nettoie les artefacts de recherche web (+1, +2, sites collés, etc.)."""
+    if not text or pd.isna(text):
+        return ""
+    t = str(text)
+    # Nettoyer les balises de citations web (+1, +2, etc.)
+    t = re.sub(r'(\w+[\.\-\w]*)\+\d+', r'\1', t)
+    # Nettoyer les domaines cités collés (wikipedia, sia-partners, etc.)
+    t = re.sub(r'\b(wikipedia|carrieresfrance\.[a-z]+|adlittle|oliverwyman|kearney|simon-kucher|capgemini|annuaire-entreprises\.data\.gouv|droitsdurgence|darrois|officiel-inclusion|eurazeo|tikehaucapital|ardian|amundi|oddo-bhf|climate-transparency-hub\.ademe|allianz|groupama|food\.ec\.europa|se)\b', '', t, flags=re.IGNORECASE)
+    # Nettoyer les suffixes d'URL collés
+    t = re.sub(r'(https?://[^\s\)]+)(sia-partners|carrieresfrance|adlittle|oliverwyman|kearney|simon-kucher|capgemini|eurazeo|tikehaucapital|ardian|amundi|oddo-bhf|allianz|groupama|danone|schneider)', r'\1', t)
+    # Espaces multiples
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t
+
+
+def load_and_merge_entreprises():
+    """Charge le fichier téléchargé, le nettoie et le fusionne avec le lot initial."""
+    all_data = list(BASE_ENTREPRISES_LOT1)
+
+    if os.path.exists(DOWNLOAD_PATH):
+        print(f"Chargement des nouvelles entreprises depuis : {DOWNLOAD_PATH}")
+        with open(DOWNLOAD_PATH, "r", encoding="utf-8", errors="ignore") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                eid = clean_text_field(row.get("ID", ""))
+                # Ne pas dupliquer si déjà présent
+                if any(x["ID"] == eid for x in all_data):
+                    continue
+
+                nom = clean_text_field(row.get("Nom_Entreprise", ""))
+                secteur = clean_text_field(row.get("Secteur_Activite", ""))
+                contact = clean_text_field(row.get("Nom_Contact_Decideur", ""))
+                poste = clean_text_field(row.get("Poste_Contact", ""))
+                email = clean_text_field(row.get("Email_Contact_Verifie", ""))
+                source = clean_text_field(row.get("Source_Officielle_RSE (Lien/Rapport)", ""))
+                ticket = clean_text_field(row.get("Ticket_Moyen_Estime", ""))
+                cout_net = clean_text_field(row.get("Cout_Net_Apres_IS_60pct", ""))
+                rse_prog = clean_text_field(row.get("Programme_RSE_Existant", ""))
+                pitch = clean_text_field(row.get("Angle_Pitch_Ambition_Campus", ""))
+
+                # Extraction d'une URL propre depuis la source RSE
+                url_match = re.search(r'https?://[^\s\)]+', source)
+                site_web = url_match.group(0) if url_match else f"https://www.{nom.lower().replace(' ', '').replace('’', '').replace('france', '')}.com"
+
+                # Attribution de la priorité selon le profil
+                if any(k in nom.lower() for k in ["sia partners", "bearingpoint", "oliver wyman", "roland berger", "bredin prat", "darrois", "white & case"]):
+                    prio = "Tier 2 - Cabinet de Référence (Conseil / Droit)"
+                elif any(k in nom.lower() for k in ["eurazeo", "tikehau", "ardian", "amundi", "oddo", "blackrock", "allianz", "groupama"]):
+                    prio = "Tier 2 - Finance, Private Equity & Assurance"
+                else:
+                    prio = "Tier 3 - Grand Groupe & Entreprise à Mission"
+
+                item = {
+                    "ID": eid,
+                    "Nom_Entreprise": nom,
+                    "Secteur_Activite": secteur,
+                    "Priorite": prio,
+                    "Nom_Contact": contact,
+                    "Poste_Contact": poste,
+                    "Email_Contact": email if email and "À compléter" not in email else f"via direction RSE ({site_web})",
+                    "LinkedIn_Contact": f"https://www.linkedin.com/company/{nom.lower().replace(' ', '-').replace('’', '')}",
+                    "Site_Web": site_web,
+                    "Ticket_Moyen_Estime": ticket,
+                    "Levier_Fiscal_60pct": f"Don {ticket} = Coût net {cout_net} (Déduction 60% IS Art. 238 bis CGI)",
+                    "Type_Approche": f"Convention Mécénat / Partenariat {rse_prog[:40]}",
+                    "Angle_Pitch_Ambition_Campus": pitch,
+                    "Statut_Prospection": "À qualifier & contacter",
+                    "Notes_Action": f"Proposer une convention de mécénat 2026-2027 et masterclass métier. Source RSE : {source[:60]}"
+                }
+                all_data.append(item)
+
+    return all_data
+
+
 def generate_database():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    df = pd.DataFrame(ENTREPRISES_DATA)
+    entreprises = load_and_merge_entreprises()
+    df = pd.DataFrame(entreprises)
 
-    # 1. Export CSV avec encodage UTF-8 BOM pour Excel français
+    # 1. Export CSV propre encodé UTF-8 BOM
     df.to_csv(CSV_PATH, index=False, encoding="utf-8-sig", sep=";")
-    print(f"[OK] CSV Entreprises genere : {CSV_PATH} ({len(df)} entreprises qualifiees)")
+    print(f"[OK] Master CSV Entreprises genere : {CSV_PATH} ({len(df)} entreprises au total)")
 
-    # 2. Export Excel formaté professionnel avec styles et largeurs de colonnes
+    # 2. Export Excel formaté professionnellement
     with pd.ExcelWriter(XLSX_PATH, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Mecenat_Entreprises", index=False)
+        df.to_excel(writer, sheet_name="Master_Entreprises", index=False)
         workbook = writer.book
-        worksheet = writer.sheets["Mecenat_Entreprises"]
+        worksheet = writer.sheets["Master_Entreprises"]
 
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         from openpyxl.utils import get_column_letter
@@ -502,15 +574,15 @@ def generate_database():
         col_widths = {
             "ID": 10,
             "Nom_Entreprise": 28,
-            "Secteur_Activite": 22,
-            "Priorite": 22,
+            "Secteur_Activite": 28,
+            "Priorite": 26,
             "Nom_Contact": 26,
-            "Poste_Contact": 28,
+            "Poste_Contact": 30,
             "Email_Contact": 32,
             "LinkedIn_Contact": 30,
             "Site_Web": 30,
             "Ticket_Moyen_Estime": 20,
-            "Levier_Fiscal_60pct": 32,
+            "Levier_Fiscal_60pct": 35,
             "Type_Approche": 32,
             "Angle_Pitch_Ambition_Campus": 38,
             "Statut_Prospection": 24,
@@ -523,7 +595,7 @@ def generate_database():
                 cell.font = cell_font
                 cell.border = thin_border
                 cell.alignment = Alignment(vertical="center", wrap_text=True)
-                
+
                 if col_name == "Priorite":
                     val = str(cell.value)
                     if "Tier 1" in val:
@@ -542,7 +614,7 @@ def generate_database():
 
         worksheet.freeze_panes = "A2"
 
-    print(f"[OK] Excel Entreprises genere : {XLSX_PATH}")
+    print(f"[OK] Master Excel Entreprises genere : {XLSX_PATH}")
 
 
 if __name__ == "__main__":
