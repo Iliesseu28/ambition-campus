@@ -11,12 +11,15 @@ import { RelanceModal } from './components/RelanceModal';
 import { AddContactModal } from './components/AddContactModal';
 import { AddOrganisationModal } from './components/AddOrganisationModal';
 import { AddColumnModal } from './components/AddColumnModal';
+import { Check, Save, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function App() {
   const [data, setData] = useState<CRMData>(loadData);
   const [activeTab, setActiveTab] = useState<ActiveTab>('entreprises');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState(false);
   const [syncStatus, setSyncStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
   // Modals state
@@ -35,11 +38,59 @@ export function App() {
   const [showAddOrganisationModal, setShowAddOrganisationModal] = useState<boolean>(false);
   const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
 
-  useEffect(() => {
-    saveData(data);
-  }, [data]);
+  // Inline Cell Editing handler
+  const handleCellEdit = (type: 'entreprise' | 'aap' | 'contact', id: string, field: string, value: string) => {
+    setData((prev) => {
+      let updated = { ...prev };
+      if (type === 'entreprise') {
+        updated.entreprises = prev.entreprises.map((e) => {
+          if (e.id === id) {
+            if (field in e) {
+              return { ...e, [field]: value };
+            } else {
+              return { ...e, custom_values: { ...(e.custom_values || {}), [field]: value } };
+            }
+          }
+          return e;
+        });
+      } else if (type === 'aap') {
+        updated.appels_projets = prev.appels_projets.map((a) => {
+          if (a.id === id) {
+            if (field in a) {
+              return { ...a, [field]: value };
+            } else {
+              return { ...a, custom_values: { ...(a.custom_values || {}), [field]: value } };
+            }
+          }
+          return a;
+        });
+      } else if (type === 'contact') {
+        updated.contacts = prev.contacts.map((c) => {
+          if (c.id === id) {
+            if (field in c) {
+              return { ...c, [field]: value };
+            } else {
+              return { ...c, custom_values: { ...(c.custom_values || {}), [field]: value } };
+            }
+          }
+          return c;
+        });
+      }
+      return updated;
+    });
 
-  // Handlers for Relances
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveAll = () => {
+    saveData(data);
+    setHasUnsavedChanges(false);
+    setSaveSuccessMessage(true);
+    setTimeout(() => {
+      setSaveSuccessMessage(false);
+    }, 3000);
+  };
+
   const handleAddRelance = (newRelance: Omit<Relance, 'id'>) => {
     const relance: Relance = {
       ...newRelance,
@@ -50,6 +101,7 @@ export function App() {
       ...prev,
       relances: [relance, ...prev.relances],
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleUpdateContactStatut = (contactId: string, statut: string, dateContact?: string) => {
@@ -65,9 +117,9 @@ export function App() {
           : c
       ),
     }));
+    setHasUnsavedChanges(true);
   };
 
-  // Handlers for Add Contact
   const handleAddContact = (newContact: Omit<Contact, 'id'>) => {
     const contact: Contact = {
       ...newContact,
@@ -78,14 +130,15 @@ export function App() {
       ...prev,
       contacts: [contact, ...prev.contacts],
     }));
+    setHasUnsavedChanges(true);
   };
 
-  // Handlers for Add Organisation (Ligne Parent)
   const handleAddEntreprise = (newEnt: Entreprise) => {
     setData((prev) => ({
       ...prev,
       entreprises: [newEnt, ...prev.entreprises],
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleAddAAP = (newAAP: AppelProjet) => {
@@ -93,14 +146,15 @@ export function App() {
       ...prev,
       appels_projets: [newAAP, ...prev.appels_projets],
     }));
+    setHasUnsavedChanges(true);
   };
 
-  // Handlers for Add Dynamic Column
   const handleAddColumn = (newField: CustomField) => {
     setData((prev) => ({
       ...prev,
       custom_fields: [...(prev.custom_fields || []), newField],
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleUpdateAAPStatut = (aapId: string, statut: string) => {
@@ -108,6 +162,7 @@ export function App() {
       ...prev,
       appels_projets: prev.appels_projets.map((a) => (a.id === aapId ? { ...a, statut_dossier: statut } : a)),
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleExport = () => {
@@ -127,12 +182,14 @@ export function App() {
     if (confirm('Voulez-vous réinitialiser la table avec les 103 cibles qualifiées par défaut ?')) {
       const fresh = resetToDefault();
       setData(fresh);
+      setHasUnsavedChanges(false);
     }
   };
 
   const handleSync = async () => {
     setIsSyncing(true);
     setSyncStatus(null);
+    saveData(data);
     const result = await syncWithSupabase(data);
     setIsSyncing(false);
     setSyncStatus({
@@ -145,7 +202,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F4F5F7] text-slate-800 flex flex-col font-sans pb-24">
       {/* Header */}
       <Header
         activeTab={activeTab}
@@ -164,15 +221,15 @@ export function App() {
 
       {/* Sync Banner */}
       {syncStatus && (
-        <div className={`px-4 py-2 text-xs text-center font-medium ${
+        <div className={`px-4 py-2.5 text-xs text-center font-medium ${
           syncStatus.isError ? 'bg-rose-50 text-rose-700 border-b border-rose-200' : 'bg-emerald-50 text-emerald-700 border-b border-emerald-200'
         }`}>
           {syncStatus.message}
         </div>
       )}
 
-      {/* Main Container */}
-      <main className="flex-1 p-4 max-w-[1700px] w-full mx-auto space-y-4">
+      {/* Main Content */}
+      <main className="flex-1 p-5 max-w-[1700px] w-full mx-auto space-y-4">
         {activeTab === 'entreprises' && (
           <EntreprisesTable
             entreprises={data.entreprises}
@@ -196,6 +253,7 @@ export function App() {
             onOpenAddOrganisation={() => setShowAddOrganisationModal(true)}
             onOpenAddColumn={() => setShowAddColumnModal(true)}
             onUpdateContactStatut={handleUpdateContactStatut}
+            onCellEdit={handleCellEdit}
           />
         )}
 
@@ -223,6 +281,7 @@ export function App() {
             onOpenAddColumn={() => setShowAddColumnModal(true)}
             onUpdateContactStatut={handleUpdateContactStatut}
             onUpdateAAPStatut={handleUpdateAAPStatut}
+            onCellEdit={handleCellEdit}
           />
         )}
 
@@ -235,6 +294,26 @@ export function App() {
           />
         )}
       </main>
+
+      {/* Sticky Bottom Floating Save Bar */}
+      <div className="fixed bottom-5 right-6 z-30 flex items-center gap-3">
+        {saveSuccessMessage && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <Check className="w-4 h-4" />
+            <span>Modifications enregistrées !</span>
+          </div>
+        )}
+
+        {hasUnsavedChanges && (
+          <button
+            onClick={handleSaveAll}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xl transition-all hover:scale-105 cursor-pointer animate-bounce"
+          >
+            <Save className="w-4 h-4" />
+            <span>Enregistrer les modifications</span>
+          </button>
+        )}
+      </div>
 
       {/* Modals */}
       {activeRelanceContact && (

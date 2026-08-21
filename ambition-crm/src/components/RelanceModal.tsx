@@ -68,7 +68,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
-        {/* Airtable Modal Header */}
+        {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-[#F8F9FA]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
@@ -77,7 +77,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
             <div>
               <h2 className="text-base font-bold text-slate-900">{contact.nom}</h2>
               <p className="text-xs text-slate-500">
-                🏢 <span className="font-medium text-slate-700">{entityName}</span> · {contact.poste || 'Référent'}
+                Organisme : <span className="font-semibold text-slate-800">{entityName}</span> · {contact.poste || 'Référent'}
               </p>
             </div>
           </div>
@@ -94,7 +94,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
           
           {/* History */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-blue-600" />
               <span>Historique des échanges ({contactRelances.length})</span>
             </h3>
@@ -154,11 +154,11 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
                   onChange={(e) => setCanal(e.target.value as any)}
                   className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option value="Email">📧 Email</option>
-                  <option value="LinkedIn">💼 LinkedIn</option>
-                  <option value="Téléphone">📞 Téléphone</option>
-                  <option value="Visio">💻 Visio / Rendez-vous</option>
-                  <option value="Courrier">✉️ Courrier officiel</option>
+                  <option value="Email">Email</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                  <option value="Téléphone">Téléphone</option>
+                  <option value="Visio">Visio / Rendez-vous</option>
+                  <option value="Courrier">Courrier officiel</option>
                   <option value="Autre">Autre</option>
                 </select>
               </div>
@@ -170,13 +170,13 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
                   onChange={(e) => setNouveauStatut(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option value="À contacter">🟡 À contacter</option>
-                  <option value="Contacté">🔵 Contacté (J0)</option>
-                  <option value="Relance 1">🟠 Relance 1 (J+7)</option>
-                  <option value="Relance 2">🔴 Relance 2 (J+15)</option>
-                  <option value="Échange en cours">💬 Échange en cours</option>
-                  <option value="Intéressé / RDV">🟢 Intéressé / RDV</option>
-                  <option value="Refus / Standby">⚪ Refus / Standby</option>
+                  <option value="À contacter">À contacter</option>
+                  <option value="Contacté">Contacté (J0)</option>
+                  <option value="Relance 1">Relance 1 (J+7)</option>
+                  <option value="Relance 2">Relance 2 (J+15)</option>
+                  <option value="Échange en cours">Échange en cours</option>
+                  <option value="Intéressé / RDV">Intéressé / RDV</option>
+                  <option value="Refus / Standby">Refus / Standby</option>
                 </select>
               </div>
             </div>
@@ -191,7 +191,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
                     className="text-blue-600 hover:underline flex items-center gap-1 cursor-pointer font-medium"
                   >
                     {copied ? <Check className="w-3 h-3" /> : null}
-                    {copied ? 'Copié !' : 'Copier le message'}
+                    {copied ? 'Copié' : 'Copier le message'}
                   </button>
                 )}
               </div>
@@ -219,7 +219,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
               <div className="flex items-end">
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-md font-semibold bg-[#2D7FF9] hover:bg-blue-600 text-white shadow-xs transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-md font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Enregistrer</span>

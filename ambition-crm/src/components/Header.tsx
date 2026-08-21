@@ -6,12 +6,8 @@ import {
   BarChart3, 
   Download, 
   RotateCcw, 
-  Database, 
-  Share2, 
-  HelpCircle, 
-  Search, 
-  Grid, 
-  Plus
+  Database,
+  Layers
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -41,109 +37,118 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
       
-      {/* Top Banner (Airtable Brand & Title Bar) */}
-      <div className="px-4 py-2 bg-[#2D7FF9] text-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            {/* Airtable-like Logo icon */}
-            <div className="w-6 h-6 rounded bg-white/20 flex items-center justify-center font-black text-xs text-white">
-              ▲
+      {/* Top Navbar */}
+      <div className="px-6 py-3.5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm text-white shadow-xs">
+              AC
             </div>
-            <div className="flex items-center gap-1.5 font-bold text-sm tracking-tight">
-              <span>Ambition Campus</span>
-              <span className="text-white/60 font-normal">/</span>
-              <span className="text-white/90 font-medium">CRM & Financements 2026</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-bold text-base tracking-tight text-white">Ambition Campus</h1>
+                <span className="text-slate-500 font-light">|</span>
+                <span className="text-slate-300 font-medium text-xs tracking-wide">Direction des Financements & Partenariats</span>
+              </div>
+              <p className="text-[11px] text-slate-400">Plateforme de levée de fonds · Égalité des chances</p>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/15 text-white border border-white/20 hidden md:inline-block">
-            Base Active · 103 Partenaires
-          </span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-3 text-xs">
           <button
             onClick={onSync}
             disabled={isSyncing}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/15 hover:bg-white/25 text-white font-medium transition border border-white/20 disabled:opacity-50"
-            title="Synchroniser avec Supabase"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-semibold transition border border-blue-500 shadow-xs disabled:opacity-50 cursor-pointer"
+            title="Synchroniser avec la base Supabase"
           >
             <Database className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{isSyncing ? 'Sync...' : 'Sync Supabase'}</span>
+            <span>{isSyncing ? 'Synchronisation...' : 'Synchroniser Supabase'}</span>
           </button>
 
           <button
             onClick={onExport}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white text-[#2D7FF9] hover:bg-slate-50 font-semibold transition shadow-xs"
-            title="Exporter la table au format Excel"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition border border-slate-700 cursor-pointer"
+            title="Exporter les données au format Excel"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Exporter</span>
+            <span>Exporter Excel</span>
           </button>
 
           <button
             onClick={onReset}
-            className="p-1 rounded bg-white/10 hover:bg-rose-500 hover:text-white text-white/80 transition"
-            title="Réinitialiser les données"
+            className="p-1.5 rounded-md bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-slate-400 transition border border-slate-700 cursor-pointer"
+            title="Réinitialiser les données par défaut"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Airtable View Tabs Bar (Entreprises / AAP / Analytics) */}
-      <div className="px-4 flex items-center justify-between border-b border-slate-200 bg-[#F4F5F7]">
-        <div className="flex items-center gap-1 -mb-[1px]">
+      {/* Large Navigation Tabs Section */}
+      <div className="px-6 bg-[#F8F9FA] border-b border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <nav className="flex items-center gap-2 -mb-[1px]">
           
-          {/* Tab 1 : Entreprises */}
+          {/* Section 1 : Entreprises */}
           <button
             onClick={() => setActiveTab('entreprises')}
-            className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               activeTab === 'entreprises'
-                ? 'border-[#2D7FF9] text-[#2D7FF9] bg-white rounded-t'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-t'
+                ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
             }`}
           >
-            <Grid className="w-3.5 h-3.5 text-emerald-600" />
-            <span>🏢 Entreprises & Mécénat</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-normal">
+            <Building2 className={`w-4 h-4 ${activeTab === 'entreprises' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <span>Entreprises & Mécénat Privé</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+              activeTab === 'entreprises' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-200 text-slate-600'
+            }`}>
               {counts.entreprises}
             </span>
           </button>
 
-          {/* Tab 2 : AAP */}
+          {/* Section 2 : AAP & Fondations */}
           <button
             onClick={() => setActiveTab('aap')}
-            className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               activeTab === 'aap'
-                ? 'border-[#2D7FF9] text-[#2D7FF9] bg-white rounded-t'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-t'
+                ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-blue-600" />
-            <span>📑 Appels à Projets & Fondations</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-normal">
+            <FileText className={`w-4 h-4 ${activeTab === 'aap' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <span>Fondations & Appels à Projets</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+              activeTab === 'aap' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-200 text-slate-600'
+            }`}>
               {counts.aap}
             </span>
           </button>
 
-          {/* Tab 3 : Analytics */}
+          {/* Section 3 : Analytics */}
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               activeTab === 'analytics'
-                ? 'border-[#2D7FF9] text-[#2D7FF9] bg-white rounded-t'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-t'
+                ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5 text-purple-600" />
-            <span>📊 Dashboard & Synthèse</span>
+            <BarChart3 className={`w-4 h-4 ${activeTab === 'analytics' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <span>Tableau de Bord & Métriques</span>
           </button>
-        </div>
+        </nav>
 
-        <div className="text-[11px] text-slate-500 hidden md:flex items-center gap-3">
-          <span><b>{counts.contacts}</b> contacts référents</span>
-          <span>•</span>
-          <span><b>{counts.relances}</b> échanges enregistrés</span>
+        <div className="text-xs text-slate-500 font-medium py-2 hidden lg:flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>{counts.contacts} contacts répertoriés</span>
+          </div>
+          <span className="text-slate-300">|</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span>{counts.relances} relances consignées</span>
+          </div>
         </div>
       </div>
 

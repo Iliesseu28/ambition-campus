@@ -78,9 +78,9 @@ export const AddOrganisationModal: React.FC<AddOrganisationModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                {type === 'entreprise' ? 'Ajouter une Entreprise / Mécène' : 'Ajouter une Fondation / Appel à projet'}
+                {type === 'entreprise' ? 'Ajouter une Entreprise' : 'Ajouter une Fondation / AAP'}
               </h2>
-              <p className="text-[11px] text-slate-500">Nouvel enregistrement parent dans le CRM</p>
+              <p className="text-[11px] text-slate-500">Nouvel organisme partenaire</p>
             </div>
           </div>
           <button
@@ -117,7 +117,7 @@ export const AddOrganisationModal: React.FC<AddOrganisationModalProps> = ({
                 type="text"
                 value={secteurOrParent}
                 onChange={(e) => setSecteurOrParent(e.target.value)}
-                placeholder={type === 'entreprise' ? 'Ex: Banque & Finance, Tech...' : 'Ex: Groupe BPCE, Bouygues...'}
+                placeholder={type === 'entreprise' ? 'Ex: Banque, Conseil, Tech...' : 'Ex: Groupe BPCE, Bouygues...'}
                 className="w-full bg-white border border-slate-300 rounded-md px-3 py-1.5 text-slate-900 focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -165,7 +165,7 @@ export const AddOrganisationModal: React.FC<AddOrganisationModalProps> = ({
             <textarea
               value={pitch}
               onChange={(e) => setPitch(e.target.value)}
-              placeholder="Pourquoi cette structure est un partenaire idéal pour Ambition Campus..."
+              placeholder="Argumentaire ou partenariat envisagé..."
               rows={2}
               className="w-full bg-white border border-slate-300 rounded-md p-2 text-slate-900 focus:outline-none focus:border-blue-500"
             />
@@ -181,10 +181,10 @@ export const AddOrganisationModal: React.FC<AddOrganisationModalProps> = ({
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold bg-[#2D7FF9] hover:bg-blue-600 text-white shadow-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Créer la ligne</span>
+              <span>Créer l'organisme</span>
             </button>
           </div>
         </form>

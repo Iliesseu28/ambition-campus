@@ -142,7 +142,7 @@ export const AddContactModal: React.FC<AddContactModalProps> = ({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Commentaires, recommandation interne..."
+              placeholder="Commentaires, historique ou recommandation..."
               rows={2}
               className="w-full bg-white border border-slate-200 rounded-md p-2.5 text-slate-900 focus:outline-none focus:border-blue-500"
             />
@@ -158,7 +158,7 @@ export const AddContactModal: React.FC<AddContactModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded font-semibold bg-[#2D7FF9] hover:bg-blue-600 text-white shadow-xs transition cursor-pointer"
+              className="px-4 py-1.5 rounded font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer"
             >
               Ajouter le contact
             </button>

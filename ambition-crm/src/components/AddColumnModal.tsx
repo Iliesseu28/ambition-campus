@@ -39,7 +39,7 @@ export const AddColumnModal: React.FC<AddColumnModalProps> = ({ onClose, onAddCo
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">Ajouter une nouvelle colonne</h2>
-              <p className="text-[11px] text-slate-500">Personnaliser le tableur Airtable</p>
+              <p className="text-[11px] text-slate-500">Personnalisation du tableau</p>
             </div>
           </div>
           <button
@@ -53,7 +53,7 @@ export const AddColumnModal: React.FC<AddColumnModalProps> = ({ onClose, onAddCo
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Nom du champ / colonne *</label>
+            <label className="block font-semibold text-slate-700 mb-1">Intitulé de la colonne *</label>
             <input
               type="text"
               required
@@ -74,14 +74,14 @@ export const AddColumnModal: React.FC<AddColumnModalProps> = ({ onClose, onAddCo
                 className="w-full bg-white border border-slate-300 rounded-md px-2.5 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="text">Texte libre</option>
-                <option value="number">Nombre / Montant</option>
+                <option value="number">Montant / Numérique</option>
                 <option value="date">Date</option>
-                <option value="select">Statut / Choix</option>
+                <option value="select">Statut / Sélecteur</option>
               </select>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Appliquer à</label>
+              <label className="block font-semibold text-slate-700 mb-1">Application</label>
               <select
                 value={target}
                 onChange={(e) => setTarget(e.target.value as any)}
@@ -104,7 +104,7 @@ export const AddColumnModal: React.FC<AddColumnModalProps> = ({ onClose, onAddCo
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold bg-[#2D7FF9] hover:bg-blue-600 text-white shadow-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Créer la colonne</span>

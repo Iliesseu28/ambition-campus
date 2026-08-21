@@ -25,7 +25,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* KPI Cards (Airtable Clean Dashboard Cards) */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs">
@@ -57,13 +57,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Échanges & Relances</span>
-            <div className="p-1.5 rounded bg-amber-50 text-amber-600 border border-amber-100">
+            <div className="p-1.5 rounded bg-amber-50 text-amber-700 border border-amber-100">
               <MessageSquare className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl font-bold text-slate-900">{totalRelances}</div>
           <p className="text-xs text-amber-700 font-medium mt-1">
-            {contactsInteresses} pistes chaudes / RDV
+            {contactsInteresses} pistes chaudes / rendez-vous
           </p>
         </div>
 
