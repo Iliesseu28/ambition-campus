@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { AppelProjet, Contact, Relance } from '../types';
+import type { AppelProjet, Contact, Relance } from '../types';
 import { 
-  FileText, 
   Search, 
   Plus, 
   Mail, 
-  Phone, 
   ExternalLink, 
-  Calendar, 
-  Sparkles, 
   ChevronRight, 
   ChevronDown, 
   SlidersHorizontal,
   MessageSquare,
   Send,
-  AlertCircle
+  Filter,
+  Layers,
+  FileText
 } from 'lucide-react';
 
 interface AppelsProjetsTableProps {
@@ -30,7 +28,6 @@ interface AppelsProjetsTableProps {
 export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
   appelsProjets,
   contacts,
-  relances,
   onOpenRelance,
   onOpenAddContact,
   onUpdateContactStatut,
@@ -41,7 +38,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
   const [selectedStatut, setSelectedStatut] = useState<string>('all');
   const [expandedAAPs, setExpandedAAPs] = useState<Record<string, boolean>>({});
 
-  // Colonnes visibles configurables
   const [visibleColumns, setVisibleColumns] = useState({
     parent: true,
     thematiques: true,
@@ -60,7 +56,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
     }));
   };
 
-  // Filtrage
   const filteredAAPs = appelsProjets.filter((aap) => {
     const matchSearch =
       aap.organisme.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,364 +74,419 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
     return matchSearch && matchPriorite && matchStatut;
   });
 
+  const getStatutBadgeStyle = (statut: string) => {
+    if (statut.includes('Lauréat') || statut.includes('Accord')) {
+      return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+    }
+    if (statut.includes('Déposé')) {
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    }
+    if (statut.includes('En cours') || statut.includes('rédaction')) {
+      return 'bg-amber-100 text-amber-800 border-amber-300';
+    }
+    if (statut.includes('En instruction')) {
+      return 'bg-purple-100 text-purple-800 border-purple-300';
+    }
+    if (statut.includes('Refus')) {
+      return 'bg-slate-100 text-slate-600 border-slate-300';
+    }
+    return 'bg-slate-100 text-slate-700 border-slate-300';
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Filtres & Recherche */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+      
+      {/* Airtable Toolbar */}
+      <div className="px-4 py-2.5 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
         
-        {/* Recherche */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Rechercher une fondation, thématique, contact..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
-          />
-        </div>
-
-        {/* Filtres Dropdowns */}
         <div className="flex items-center gap-2">
-          <select
-            value={selectedPriorite}
-            onChange={(e) => setSelectedPriorite(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Toutes priorités</option>
-            <option value="Tier 1">Tier 1 - Piste Chaude</option>
-            <option value="Tier 2">Tier 2 - Grand Donateur</option>
-            <option value="Tier 3">Tier 3 - Standard</option>
-          </select>
-
-          <select
-            value={selectedStatut}
-            onChange={(e) => setSelectedStatut(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Tous les statuts de dossier</option>
-            <option value="À préparer">À préparer</option>
-            <option value="À contacter en priorité (Email prêt)">À contacter en priorité</option>
-            <option value="En cours de rédaction">En cours de rédaction</option>
-            <option value="Déposé">Dossier déposé</option>
-            <option value="Lauréat / Accord">Lauréat / Accord</option>
-          </select>
-
-          {/* Menu Colonnes */}
+          {/* Hide/Show Fields */}
           <div className="relative">
             <button
               onClick={() => setShowColMenu(!showColMenu)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-slate-100 text-slate-700 font-medium transition border border-transparent hover:border-slate-200 cursor-pointer"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Colonnes</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+              <span>Champs ({Object.values(visibleColumns).filter(Boolean).length + 3})</span>
             </button>
 
             {showColMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl p-2 shadow-xl z-30 space-y-1 text-xs">
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+              <div className="absolute left-0 mt-1.5 w-56 bg-white border border-slate-200 rounded-lg p-2 shadow-lg z-30 space-y-1">
+                <div className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Colonnes visibles
+                </div>
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.parent}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, parent: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Groupe Parent</span>
                 </label>
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.thematiques}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, thematiques: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Thématiques</span>
                 </label>
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.priorite}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, priorite: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Priorité</span>
                 </label>
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.ticket}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, ticket: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>Ticket Estimé</span>
+                  <span>Ticket Visé</span>
                 </label>
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.lienDepot}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, lienDepot: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span>Lien de dépôt AAP</span>
+                  <span>Guichet de dépôt</span>
                 </label>
-                <label className="flex items-center gap-2 p-1.5 hover:bg-slate-800 rounded cursor-pointer">
+                <label className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer text-slate-700">
                   <input
                     type="checkbox"
                     checked={visibleColumns.pitch}
                     onChange={(e) => setVisibleColumns({ ...visibleColumns, pitch: e.target.checked })}
-                    className="rounded border-slate-700 text-amber-500"
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Angle de Pitch</span>
                 </label>
               </div>
             )}
           </div>
+
+          {/* Filter Priorite */}
+          <div className="flex items-center gap-1">
+            <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <select
+              value={selectedPriorite}
+              onChange={(e) => setSelectedPriorite(e.target.value)}
+              className="bg-transparent border border-slate-200 rounded px-2 py-1 text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+            >
+              <option value="all">Toutes priorités</option>
+              <option value="Tier 1">Tier 1 - Piste Chaude</option>
+              <option value="Tier 2">Tier 2 - Grand Donateur</option>
+              <option value="Tier 3">Tier 3 - Standard</option>
+            </select>
+          </div>
+
+          {/* Filter Statut Dossier */}
+          <select
+            value={selectedStatut}
+            onChange={(e) => setSelectedStatut(e.target.value)}
+            className="bg-transparent border border-slate-200 rounded px-2 py-1 text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+          >
+            <option value="all">Tous les statuts de dossier</option>
+            <option value="À préparer">À préparer</option>
+            <option value="En cours de rédaction">En cours de rédaction</option>
+            <option value="Déposé">Dossier déposé</option>
+            <option value="En instruction">En instruction</option>
+            <option value="Lauréat / Accord">Lauréat / Accord</option>
+          </select>
+        </div>
+
+        {/* Right Search Input */}
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Rechercher une fondation, thématique..."
+            className="bg-slate-50 border border-slate-200 rounded-md pl-8 pr-3 py-1 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 w-64 transition"
+          />
         </div>
       </div>
 
-      {/* Table Fondations / Appels à projets */}
-      <div className="bg-slate-900/60 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
-                <th className="py-3 px-4 w-10"></th>
-                <th className="py-3 px-4">Fondation & Organisme</th>
-                {visibleColumns.parent && <th className="py-3 px-4">Groupe Parent</th>}
-                {visibleColumns.thematiques && <th className="py-3 px-4">Thématiques Clés</th>}
-                {visibleColumns.priorite && <th className="py-3 px-4">Priorité</th>}
-                <th className="py-3 px-4">Contacts Référents</th>
-                {visibleColumns.ticket && <th className="py-3 px-4">Ticket Visé</th>}
-                {visibleColumns.lienDepot && <th className="py-3 px-4">Guichet & Dépôt</th>}
-                <th className="py-3 px-4">Statut Dossier</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+      {/* Airtable Grid Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="bg-[#F8F9FA] border-b border-slate-200 text-slate-600 font-semibold select-none">
+              <th className="py-2.5 px-3 w-10 text-center border-r border-slate-200 text-slate-400">#</th>
+              <th className="py-2.5 px-3 border-r border-slate-200 min-w-[200px]">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Fondation & Organisme</span>
+                </div>
+              </th>
+              {visibleColumns.parent && (
+                <th className="py-2.5 px-3 border-r border-slate-200 min-w-[140px]">
+                  <span>Groupe Parent</span>
+                </th>
+              )}
+              {visibleColumns.thematiques && (
+                <th className="py-2.5 px-3 border-r border-slate-200 min-w-[200px]">
+                  <span>Thématiques Clés</span>
+                </th>
+              )}
+              {visibleColumns.priorite && (
+                <th className="py-2.5 px-3 border-r border-slate-200 min-w-[120px]">
+                  <span>Priorité</span>
+                </th>
+              )}
+              <th className="py-2.5 px-3 border-r border-slate-200 min-w-[160px]">
+                <span>Contacts Référents</span>
+              </th>
+              {visibleColumns.ticket && (
+                <th className="py-2.5 px-3 border-r border-slate-200 min-w-[120px]">
+                  <span>Ticket Visé</span>
+                </th>
+              )}
+              {visibleColumns.lienDepot && (
+                <th className="py-2.5 px-3 border-r border-slate-200 min-w-[180px]">
+                  <span>Guichet de dépôt</span>
+                </th>
+              )}
+              <th className="py-2.5 px-3 border-r border-slate-200 min-w-[160px]">
+                <span>Statut Dossier</span>
+              </th>
+              <th className="py-2.5 px-3 text-right">
+                <span>Actions</span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-slate-200">
+            {filteredAAPs.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="py-12 text-center text-slate-400">
+                  Aucun appel à projet ne correspond aux filtres.
+                </td>
               </tr>
-            </thead>
+            ) : (
+              filteredAAPs.map((aap, idx) => {
+                const aapContacts = contacts.filter((c) => c.target_id === aap.id);
+                const isExpanded = expandedAAPs[aap.id] ?? true;
 
-            <tbody className="divide-y divide-slate-800/60">
-              {filteredAAPs.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-500">
-                    Aucun appel à projet ne correspond aux critères.
-                  </td>
-                </tr>
-              ) : (
-                filteredAAPs.map((aap) => {
-                  const aapContacts = contacts.filter((c) => c.target_id === aap.id);
-                  const isExpanded = expandedAAPs[aap.id] ?? true;
-
-                  return (
-                    <React.Fragment key={aap.id}>
-                      {/* Ligne Fondation Parent */}
-                      <tr className="hover:bg-slate-800/30 transition-colors group bg-slate-900/40">
-                        <td className="py-3 px-3 text-center">
+                return (
+                  <React.Fragment key={aap.id}>
+                    {/* Primary Row Fondation */}
+                    <tr className="hover:bg-slate-50/80 transition-colors bg-white group">
+                      <td className="py-2 px-2 text-center border-r border-slate-200 text-slate-400 font-mono text-[11px]">
+                        <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => toggleExpand(aap.id)}
-                            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                            className="text-slate-400 hover:text-slate-700 cursor-pointer"
                           >
                             {isExpanded ? (
-                              <ChevronDown className="w-4 h-4 text-amber-400" />
+                              <ChevronDown className="w-3.5 h-3.5 text-blue-600" />
                             ) : (
-                              <ChevronRight className="w-4 h-4 text-slate-500" />
+                              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                             )}
                           </button>
-                        </td>
+                          <span>{idx + 1}</span>
+                        </div>
+                      </td>
 
-                        {/* Nom Fondation */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-sm group-hover:text-amber-400 transition">
-                              {aap.organisme}
-                            </span>
-                            {aap.site_web && (
-                              <a
-                                href={aap.site_web}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-slate-500 hover:text-amber-400 transition"
-                              >
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-mono">{aap.id}</span>
-                        </td>
-
-                        {/* Groupe Parent */}
-                        {visibleColumns.parent && (
-                          <td className="py-3 px-4 text-slate-300 text-[11px]">
-                            {aap.groupe_parent || '-'}
-                          </td>
-                        )}
-
-                        {/* Thématiques */}
-                        {visibleColumns.thematiques && (
-                          <td className="py-3 px-4 text-slate-300 max-w-xs">
-                            <span className="line-clamp-2 text-[11px]" title={aap.thematiques}>
-                              {aap.thematiques}
-                            </span>
-                          </td>
-                        )}
-
-                        {/* Priorité */}
-                        {visibleColumns.priorite && (
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                              aap.priorite.includes('Tier 1')
-                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                                : aap.priorite.includes('Tier 2')
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
-                            }`}>
-                              {aap.priorite}
-                            </span>
-                          </td>
-                        )}
-
-                        {/* Contacts Référents */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-slate-200">
-                              {aapContacts.length} contact{aapContacts.length > 1 ? 's' : ''}
-                            </span>
-                            <button
-                              onClick={() => onOpenAddContact(aap)}
-                              className="p-1 rounded-md bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 transition text-[10px] flex items-center gap-1"
-                              title="Ajouter un contact référent à cette fondation"
+                      {/* Nom Fondation */}
+                      <td className="py-2 px-3 border-r border-slate-200 font-semibold text-slate-900">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate">{aap.organisme}</span>
+                          {aap.site_web && (
+                            <a
+                              href={aap.site_web}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-slate-400 hover:text-blue-600"
+                              title="Site web"
                             >
-                              <Plus className="w-3 h-3" />
-                              <span>Ajouter</span>
-                            </button>
-                          </div>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Parent */}
+                      {visibleColumns.parent && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[11px]">
+                          {aap.groupe_parent || '-'}
+                        </td>
+                      )}
+
+                      {/* Thematiques */}
+                      {visibleColumns.thematiques && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-700 text-[11px] max-w-xs">
+                          <span className="line-clamp-1" title={aap.thematiques}>
+                            {aap.thematiques}
+                          </span>
+                        </td>
+                      )}
+
+                      {/* Priorite */}
+                      {visibleColumns.priorite && (
+                        <td className="py-2 px-3 border-r border-slate-200">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            aap.priorite.includes('Tier 1')
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                              : aap.priorite.includes('Tier 2')
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                          }`}>
+                            {aap.priorite}
+                          </span>
+                        </td>
+                      )}
+
+                      {/* Contacts count & Add */}
+                      <td className="py-2 px-3 border-r border-slate-200">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-slate-700">
+                            {aapContacts.length} contact{aapContacts.length > 1 ? 's' : ''}
+                          </span>
+                          <button
+                            onClick={() => onOpenAddContact(aap)}
+                            className="p-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition text-[10px] flex items-center gap-0.5 cursor-pointer"
+                            title="Ajouter un contact"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Ajouter</span>
+                          </button>
+                        </div>
+                      </td>
+
+                      {/* Ticket */}
+                      {visibleColumns.ticket && (
+                        <td className="py-2 px-3 border-r border-slate-200 font-semibold text-emerald-700">
+                          {aap.ticket_estime}
+                        </td>
+                      )}
+
+                      {/* Lien Depot */}
+                      {visibleColumns.lienDepot && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[11px] max-w-xs truncate" title={aap.lien_depot}>
+                          {aap.lien_depot || 'Contact direct'}
+                        </td>
+                      )}
+
+                      {/* Statut Dossier Pill */}
+                      <td className="py-2 px-3 border-r border-slate-200">
+                        <select
+                          value={aap.statut_dossier}
+                          onChange={(e) => onUpdateAAPStatut(aap.id, e.target.value)}
+                          className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(aap.statut_dossier)}`}
+                        >
+                          <option value="À préparer">🟡 À préparer</option>
+                          <option value="En cours de rédaction">🟠 En rédaction</option>
+                          <option value="Déposé">🔵 Déposé</option>
+                          <option value="En instruction">🟣 En instruction</option>
+                          <option value="Lauréat / Accord">🟢 Lauréat / Accord</option>
+                          <option value="Refusé">⚪ Refusé</option>
+                        </select>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-2 px-3 text-right">
+                        <button
+                          onClick={() => onOpenAddContact(aap)}
+                          className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-medium transition cursor-pointer"
+                        >
+                          + Contact
+                        </button>
+                      </td>
+                    </tr>
+
+                    {/* Sub-Rows Contacts Fondation */}
+                    {isExpanded && aapContacts.map((contact, cIdx) => (
+                      <tr key={contact.id} className="bg-[#F8F9FA]/60 hover:bg-blue-50/40 transition-colors border-l-4 border-l-blue-400">
+                        <td className="py-1.5 px-2 text-center border-r border-slate-200 text-slate-400 font-mono text-[10px]">
+                          {idx + 1}.{cIdx + 1}
                         </td>
 
-                        {/* Ticket */}
-                        {visibleColumns.ticket && (
-                          <td className="py-3 px-4 font-semibold text-emerald-400">
-                            {aap.ticket_estime}
-                          </td>
-                        )}
+                        <td className="py-1.5 px-3 border-r border-slate-200 pl-6">
+                          <div className="flex items-center gap-1.5 font-medium text-slate-900">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <span>{contact.nom}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 block ml-3">{contact.poste}</span>
+                        </td>
 
-                        {/* Lien Dépôt AAP */}
-                        {visibleColumns.lienDepot && (
-                          <td className="py-3 px-4 text-[11px] max-w-xs truncate">
-                            {aap.lien_depot ? (
-                              <span className="text-slate-400" title={aap.lien_depot}>
-                                {aap.lien_depot}
-                              </span>
-                            ) : (
-                              <span className="text-slate-600">Contact direct</span>
-                            )}
-                          </td>
-                        )}
+                        <td colSpan={3} className="py-1.5 px-3 border-r border-slate-200 text-[11px]">
+                          {contact.email ? (
+                            <a
+                              href={`mailto:${contact.email}`}
+                              className="flex items-center gap-1 text-slate-600 hover:text-blue-600"
+                            >
+                              <Mail className="w-3 h-3 text-slate-400" />
+                              <span>{contact.email}</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-400">Email non renseigné</span>
+                          )}
+                        </td>
 
-                        {/* Statut Dossier */}
-                        <td className="py-3 px-4">
+                        <td className="py-1.5 px-3 border-r border-slate-200">
                           <select
-                            value={aap.statut_dossier}
-                            onChange={(e) => onUpdateAAPStatut(aap.id, e.target.value)}
-                            className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-amber-500"
+                            value={contact.statut}
+                            onChange={(e) => onUpdateContactStatut(contact.id, e.target.value)}
+                            className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(contact.statut)}`}
                           >
-                            <option value="À préparer">🟡 À préparer</option>
-                            <option value="En cours de rédaction">🟠 En rédaction</option>
-                            <option value="Déposé">🔵 Déposé</option>
-                            <option value="En instruction">🟣 En instruction</option>
-                            <option value="Lauréat / Accord">🟢 Lauréat / Accord</option>
-                            <option value="Refusé">⚪ Refusé</option>
+                            <option value="À contacter">🟡 À contacter</option>
+                            <option value="Contacté">🔵 Contacté (J0)</option>
+                            <option value="Relance 1">🟠 Relance 1</option>
+                            <option value="Relance 2">🔴 Relance 2</option>
+                            <option value="Échange en cours">💬 Échange</option>
+                            <option value="Intéressé / RDV">🟢 Intéressé</option>
+                            <option value="Refus / Standby">⚪ Refus</option>
                           </select>
                         </td>
 
-                        {/* Actions */}
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => onOpenAddContact(aap)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
-                          >
-                            + Nouveau contact
-                          </button>
+                        <td colSpan={2} className="py-1.5 px-3 border-r border-slate-200 text-slate-600 text-[11px]">
+                          {contact.dernier_contact ? (
+                            <span>Dernier échange : {contact.dernier_contact}</span>
+                          ) : (
+                            <span className="text-slate-400">Aucun échange consigné</span>
+                          )}
+                        </td>
+
+                        <td colSpan={2} className="py-1.5 px-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => onOpenRelance(contact, aap)}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold transition cursor-pointer"
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                              <span>Relancer / Notes</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                alert(`🚀 [n8n Automation Ready] Déclenchement du webhook n8n pour ${contact.nom} (${aap.organisme})`);
+                              }}
+                              className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-emerald-600 border border-slate-200 transition cursor-pointer"
+                            >
+                              <Send className="w-3 h-3" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-
-                      {/* Sous-lignes : Contacts de la fondation */}
-                      {isExpanded && aapContacts.map((contact) => (
-                        <tr key={contact.id} className="bg-slate-950/40 hover:bg-slate-950/80 transition-colors border-l-2 border-l-amber-500/40">
-                          <td></td>
-                          
-                          <td className="py-2.5 px-4 pl-8">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                              <span className="font-semibold text-slate-100">{contact.nom}</span>
-                            </div>
-                            <span className="text-[11px] text-slate-400 ml-3.5 block">{contact.poste}</span>
-                          </td>
-
-                          <td colSpan={3} className="py-2.5 px-4">
-                            {contact.email && (
-                              <a
-                                href={`mailto:${contact.email}`}
-                                className="flex items-center gap-1.5 text-slate-300 hover:text-amber-400 text-[11px] transition"
-                              >
-                                <Mail className="w-3 h-3 text-slate-500" />
-                                <span>{contact.email}</span>
-                              </a>
-                            )}
-                          </td>
-
-                          <td className="py-2.5 px-4">
-                            <select
-                              value={contact.statut}
-                              onChange={(e) => onUpdateContactStatut(contact.id, e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-amber-500"
-                            >
-                              <option value="À contacter">🟡 À contacter</option>
-                              <option value="Contacté">🔵 Contacté (J0)</option>
-                              <option value="Relance 1">🟠 Relance 1</option>
-                              <option value="Relance 2">🔴 Relance 2</option>
-                              <option value="Échange en cours">💬 Échange en cours</option>
-                              <option value="Intéressé / RDV">🟢 Intéressé</option>
-                              <option value="Refus / Standby">⚪ Refus</option>
-                            </select>
-                          </td>
-
-                          <td colSpan={2} className="py-2.5 px-4 text-[11px] text-slate-400">
-                            {contact.dernier_contact ? (
-                              <span>Dernier échange : {contact.dernier_contact}</span>
-                            ) : (
-                              <span className="text-slate-600">Aucun échange consigné</span>
-                            )}
-                          </td>
-
-                          <td colSpan={2} className="py-2.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => onOpenRelance(contact, aap)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 transition shadow-sm"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                <span>Relancer / Historique</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  alert(`🚀 [n8n Automation Ready] Déclenchement du webhook n8n pour ${contact.nom} (${aap.organisme})`);
-                                }}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 border border-slate-800 transition"
-                                title="Déclencher automatisation n8n (génération & envoi)"
-                              >
-                                <Send className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                    ))}
+                  </React.Fragment>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
+
     </div>
   );
 };

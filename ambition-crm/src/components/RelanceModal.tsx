@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Contact, Relance } from '../types';
-import { X, Send, Calendar, Clock, MessageSquare, Plus, Sparkles, Check } from 'lucide-react';
+import type { Contact, Relance } from '../types';
+import { X, Send, Calendar, Clock, MessageSquare, Sparkles, Check, User } from 'lucide-react';
 
 interface RelanceModalProps {
   contact: Contact;
@@ -65,61 +65,61 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
-        {/* Modal Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">{contact.nom}</h2>
-              <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">
-                {contact.poste || 'Référent'}
-              </span>
+        {/* Airtable Modal Header */}
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-[#F8F9FA]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+              <User className="w-4 h-4" />
             </div>
-            <p className="text-xs text-amber-400 font-medium">
-              🏢 {entityName} · <span className="text-slate-400">{contact.email || 'Email non renseigné'}</span>
-            </p>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">{contact.nom}</h2>
+              <p className="text-xs text-slate-500">
+                🏢 <span className="font-medium text-slate-700">{entityName}</span> · {contact.poste || 'Référent'}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
           
-          {/* Historique des relances */}
+          {/* History */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
-              Historique des échanges ({contactRelances.length})
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-blue-600" />
+              <span>Historique des échanges ({contactRelances.length})</span>
             </h3>
             {contactRelances.length === 0 ? (
-              <div className="p-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/40 text-center">
-                <p className="text-xs text-slate-500">Aucun échange ou relance enregistré pour le moment.</p>
+              <div className="p-4 rounded-lg border border-dashed border-slate-200 bg-slate-50 text-center">
+                <p className="text-slate-500">Aucun échange consigné pour ce contact.</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {contactRelances.map((r) => (
-                  <div key={r.id} className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
+                  <div key={r.id} className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[10px] font-semibold">
+                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-[10px]">
                           {r.type_canal}
                         </span>
-                        <span className="text-slate-300 font-medium">{r.date_relance}</span>
+                        <span className="text-slate-700 font-medium">{r.date_relance}</span>
                       </div>
                       {r.prochaine_date && (
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-amber-400" /> Prochaine : {r.prochaine_date}
+                        <span className="text-slate-500 flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-amber-600" /> Prochaine : {r.prochaine_date}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-300 whitespace-pre-line bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80">
+                    <p className="text-slate-700 whitespace-pre-line bg-white p-2.5 rounded border border-slate-200 font-mono text-[11px] leading-relaxed">
                       {r.message}
                     </p>
                   </div>
@@ -128,31 +128,31 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
             )}
           </div>
 
-          {/* Formulaire Nouvelle Relance */}
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t border-slate-800">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t border-slate-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-white flex items-center gap-2">
-                <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
-                Enregistrer un nouvel échange / relance
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                <span>Consigner une nouvelle relance / note</span>
               </h3>
               
               <button
                 type="button"
                 onClick={handleGeneratePitch}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition"
+                className="flex items-center gap-1 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold transition cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span>Générer proposition IA</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Canal utilisé</label>
+                <label className="block font-medium text-slate-700 mb-1">Canal utilisé</label>
                 <select
                   value={canal}
                   onChange={(e) => setCanal(e.target.value as any)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
                   <option value="Email">📧 Email</option>
                   <option value="LinkedIn">💼 LinkedIn</option>
@@ -164,18 +164,18 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Nouveau statut du contact</label>
+                <label className="block font-medium text-slate-700 mb-1">Nouveau statut</label>
                 <select
                   value={nouveauStatut}
                   onChange={(e) => setNouveauStatut(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
                   <option value="À contacter">🟡 À contacter</option>
                   <option value="Contacté">🔵 Contacté (J0)</option>
                   <option value="Relance 1">🟠 Relance 1 (J+7)</option>
                   <option value="Relance 2">🔴 Relance 2 (J+15)</option>
                   <option value="Échange en cours">💬 Échange en cours</option>
-                  <option value="Intéressé / RDV">🟢 Intéressé / RDV obtenu</option>
+                  <option value="Intéressé / RDV">🟢 Intéressé / RDV</option>
                   <option value="Refus / Standby">⚪ Refus / Standby</option>
                 </select>
               </div>
@@ -183,46 +183,46 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-[11px] font-medium text-slate-400">Message envoyé ou Notes de l'échange</label>
+                <label className="block font-medium text-slate-700">Contenu du message ou compte-rendu</label>
                 {message && (
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="text-[11px] text-amber-400 hover:underline flex items-center gap-1"
+                    className="text-blue-600 hover:underline flex items-center gap-1 cursor-pointer font-medium"
                   >
                     {copied ? <Check className="w-3 h-3" /> : null}
-                    {copied ? 'Copié !' : 'Copier le texte'}
+                    {copied ? 'Copié !' : 'Copier le message'}
                   </button>
                 )}
               </div>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Rédigez ou collez le message envoyé, ou résumez le retour téléphonique..."
+                placeholder="Rédigez le message ou notez les points clés..."
                 rows={4}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono leading-relaxed"
+                className="w-full bg-white border border-slate-200 rounded-md p-2.5 text-slate-800 focus:outline-none focus:border-blue-500 font-mono text-[11px] leading-relaxed"
                 required
               />
             </div>
 
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Date de prochaine relance (optionnel)</label>
+                <label className="block font-medium text-slate-700 mb-1">Prochaine relance (optionnel)</label>
                 <input
                   type="date"
                   value={prochaineDate}
                   onChange={(e) => setProchaineDate(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="flex items-end gap-2">
+              <div className="flex items-end">
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-md font-semibold bg-[#2D7FF9] hover:bg-blue-600 text-white shadow-xs transition cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Enregistrer l'échange</span>
+                  <span>Enregistrer</span>
                 </button>
               </div>
             </div>

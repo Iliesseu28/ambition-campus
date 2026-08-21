@@ -2,23 +2,29 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-amber-500/30 selection:text-amber-200;
+    @apply bg-[#F4F5F7] text-slate-800 font-sans antialiased min-h-screen selection:bg-blue-100 selection:text-blue-900;
   }
 }
 
-/* Custom scrollbar */
+/* Airtable-like spreadsheet scrollbars & table styling */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #f1f3f5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: #d0d5dd;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #98a2b3;
 }
+
+/* Cell hover outline */
+.airtable-cell {
+  @apply transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:z-10;
+}
+
 

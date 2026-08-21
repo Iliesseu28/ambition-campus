@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ActiveTab, Entreprise, AppelProjet, Contact, Relance } from './types';
+import type { ActiveTab, Contact, Relance } from './types';
 import { loadData, saveData, resetToDefault } from './lib/storage';
 import type { CRMData } from './lib/storage';
 import { syncWithSupabase } from './lib/sync';
@@ -30,12 +30,10 @@ export function App() {
     nom: string;
   } | null>(null);
 
-  // Sync back to local storage whenever data changes
   useEffect(() => {
     saveData(data);
   }, [data]);
 
-  // Handlers for Relances
   const handleAddRelance = (newRelance: Omit<Relance, 'id'>) => {
     const relance: Relance = {
       ...newRelance,
@@ -63,7 +61,6 @@ export function App() {
     }));
   };
 
-  // Handlers for Add Contact
   const handleAddContact = (newContact: Omit<Contact, 'id'>) => {
     const contact: Contact = {
       ...newContact,
@@ -76,7 +73,6 @@ export function App() {
     }));
   };
 
-  // Handlers for Enterprise & AAP updates
   const handleUpdateEntrepriseStatut = (entrepriseId: string, statut: string) => {
     setData((prev) => ({
       ...prev,
@@ -91,31 +87,21 @@ export function App() {
     }));
   };
 
-  // Export Data to Excel
   const handleExport = () => {
     const wb = XLSX.utils.book_new();
-
-    // Sheet 1 : Entreprises
     const wsEntreprises = XLSX.utils.json_to_sheet(data.entreprises);
     XLSX.utils.book_append_sheet(wb, wsEntreprises, 'Entreprises');
-
-    // Sheet 2 : Appels à projets
     const wsAAP = XLSX.utils.json_to_sheet(data.appels_projets);
     XLSX.utils.book_append_sheet(wb, wsAAP, 'Fondations_AAP');
-
-    // Sheet 3 : Contacts
     const wsContacts = XLSX.utils.json_to_sheet(data.contacts);
     XLSX.utils.book_append_sheet(wb, wsContacts, 'Contacts');
-
-    // Sheet 4 : Relances
     const wsRelances = XLSX.utils.json_to_sheet(data.relances);
     XLSX.utils.book_append_sheet(wb, wsRelances, 'Historique_Relances');
-
-    XLSX.writeFile(wb, `Ambition_Campus_CRM_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `Ambition_Campus_Airtable_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleReset = () => {
-    if (confirm('Voulez-vous réinitialiser le tableau avec les 103 cibles qualifiées par défaut ?')) {
+    if (confirm('Voulez-vous réinitialiser la table avec les 103 cibles qualifiées par défaut ?')) {
       const fresh = resetToDefault();
       setData(fresh);
     }
@@ -136,8 +122,8 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Header & Nav */}
+    <div className="min-h-screen bg-[#F4F5F7] text-slate-800 flex flex-col font-sans">
+      {/* Airtable Master Header */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -155,15 +141,15 @@ export function App() {
 
       {/* Sync Status Banner */}
       {syncStatus && (
-        <div className={`px-6 py-2.5 text-xs text-center font-medium ${
-          syncStatus.isError ? 'bg-rose-500/20 text-rose-300 border-b border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border-b border-emerald-500/30'
+        <div className={`px-4 py-2 text-xs text-center font-medium ${
+          syncStatus.isError ? 'bg-rose-50 text-rose-700 border-b border-rose-200' : 'bg-emerald-50 text-emerald-700 border-b border-emerald-200'
         }`}>
           {syncStatus.message}
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+      {/* Main Grid Viewport */}
+      <main className="flex-1 p-4 max-w-[1600px] w-full mx-auto space-y-4">
         {activeTab === 'entreprises' && (
           <EntreprisesTable
             entreprises={data.entreprises}
@@ -222,7 +208,7 @@ export function App() {
         )}
       </main>
 
-      {/* Modal Relance & Échange */}
+      {/* Modals */}
       {activeRelanceContact && (
         <RelanceModal
           contact={activeRelanceContact.contact}
@@ -235,7 +221,6 @@ export function App() {
         />
       )}
 
-      {/* Modal Add Contact */}
       {activeAddContactEntity && (
         <AddContactModal
           targetType={activeAddContactEntity.type}
