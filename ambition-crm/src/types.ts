@@ -1,5 +1,12 @@
 export type Priority = 'Tier 1' | 'Tier 2' | 'Tier 3' | string;
 
+export interface CustomField {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'select' | 'date';
+  target: 'all' | 'contact' | 'parent';
+}
+
 export interface Contact {
   id: string;
   target_type: 'entreprise' | 'aap';
@@ -13,6 +20,7 @@ export interface Contact {
   notes: string;
   dernier_contact?: string | null;
   prochaine_relance?: string | null;
+  custom_values?: Record<string, string>;
 }
 
 export interface Entreprise {
@@ -28,6 +36,7 @@ export interface Entreprise {
   site_web: string;
   notes: string;
   created_at: string;
+  custom_values?: Record<string, string>;
 }
 
 export interface AppelProjet {
@@ -45,6 +54,7 @@ export interface AppelProjet {
   deadline?: string | null;
   notes: string;
   created_at: string;
+  custom_values?: Record<string, string>;
 }
 
 export interface Relance {
@@ -61,18 +71,3 @@ export interface Relance {
 }
 
 export type ActiveTab = 'entreprises' | 'aap' | 'analytics';
-
-export type ColumnKey = 
-  | 'nom'
-  | 'secteur'
-  | 'priorite'
-  | 'contacts'
-  | 'ticket'
-  | 'statut'
-  | 'actions'
-  | 'prochaine_relance'
-  | 'levier_fiscal'
-  | 'type_approche'
-  | 'site_web'
-  | 'notes';
-

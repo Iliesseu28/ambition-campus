@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ActiveTab, Contact, Relance } from './types';
+import type { ActiveTab, Contact, Relance, Entreprise, AppelProjet, CustomField } from './types';
 import { loadData, saveData, resetToDefault } from './lib/storage';
 import type { CRMData } from './lib/storage';
 import { syncWithSupabase } from './lib/sync';
@@ -9,6 +9,8 @@ import { AppelsProjetsTable } from './components/AppelsProjetsTable';
 import { AnalyticsView } from './components/AnalyticsView';
 import { RelanceModal } from './components/RelanceModal';
 import { AddContactModal } from './components/AddContactModal';
+import { AddOrganisationModal } from './components/AddOrganisationModal';
+import { AddColumnModal } from './components/AddColumnModal';
 import * as XLSX from 'xlsx';
 
 export function App() {
@@ -30,10 +32,14 @@ export function App() {
     nom: string;
   } | null>(null);
 
+  const [showAddOrganisationModal, setShowAddOrganisationModal] = useState<boolean>(false);
+  const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
+
   useEffect(() => {
     saveData(data);
   }, [data]);
 
+  // Handlers for Relances
   const handleAddRelance = (newRelance: Omit<Relance, 'id'>) => {
     const relance: Relance = {
       ...newRelance,
@@ -61,6 +67,7 @@ export function App() {
     }));
   };
 
+  // Handlers for Add Contact
   const handleAddContact = (newContact: Omit<Contact, 'id'>) => {
     const contact: Contact = {
       ...newContact,
@@ -73,10 +80,26 @@ export function App() {
     }));
   };
 
-  const handleUpdateEntrepriseStatut = (entrepriseId: string, statut: string) => {
+  // Handlers for Add Organisation (Ligne Parent)
+  const handleAddEntreprise = (newEnt: Entreprise) => {
     setData((prev) => ({
       ...prev,
-      entreprises: prev.entreprises.map((e) => (e.id === entrepriseId ? { ...e, statut_global: statut } : e)),
+      entreprises: [newEnt, ...prev.entreprises],
+    }));
+  };
+
+  const handleAddAAP = (newAAP: AppelProjet) => {
+    setData((prev) => ({
+      ...prev,
+      appels_projets: [newAAP, ...prev.appels_projets],
+    }));
+  };
+
+  // Handlers for Add Dynamic Column
+  const handleAddColumn = (newField: CustomField) => {
+    setData((prev) => ({
+      ...prev,
+      custom_fields: [...(prev.custom_fields || []), newField],
     }));
   };
 
@@ -123,7 +146,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#F4F5F7] text-slate-800 flex flex-col font-sans">
-      {/* Airtable Master Header */}
+      {/* Header */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -139,7 +162,7 @@ export function App() {
         isSyncing={isSyncing}
       />
 
-      {/* Sync Status Banner */}
+      {/* Sync Banner */}
       {syncStatus && (
         <div className={`px-4 py-2 text-xs text-center font-medium ${
           syncStatus.isError ? 'bg-rose-50 text-rose-700 border-b border-rose-200' : 'bg-emerald-50 text-emerald-700 border-b border-emerald-200'
@@ -148,13 +171,14 @@ export function App() {
         </div>
       )}
 
-      {/* Main Grid Viewport */}
-      <main className="flex-1 p-4 max-w-[1600px] w-full mx-auto space-y-4">
+      {/* Main Container */}
+      <main className="flex-1 p-4 max-w-[1700px] w-full mx-auto space-y-4">
         {activeTab === 'entreprises' && (
           <EntreprisesTable
             entreprises={data.entreprises}
             contacts={data.contacts}
             relances={data.relances}
+            customFields={data.custom_fields || []}
             onOpenRelance={(contact, entreprise) =>
               setActiveRelanceContact({
                 contact,
@@ -169,8 +193,9 @@ export function App() {
                 nom: entreprise.nom,
               })
             }
+            onOpenAddOrganisation={() => setShowAddOrganisationModal(true)}
+            onOpenAddColumn={() => setShowAddColumnModal(true)}
             onUpdateContactStatut={handleUpdateContactStatut}
-            onUpdateEntrepriseStatut={handleUpdateEntrepriseStatut}
           />
         )}
 
@@ -179,6 +204,7 @@ export function App() {
             appelsProjets={data.appels_projets}
             contacts={data.contacts}
             relances={data.relances}
+            customFields={data.custom_fields || []}
             onOpenRelance={(contact, aap) =>
               setActiveRelanceContact({
                 contact,
@@ -193,6 +219,8 @@ export function App() {
                 nom: aap.organisme,
               })
             }
+            onOpenAddOrganisation={() => setShowAddOrganisationModal(true)}
+            onOpenAddColumn={() => setShowAddColumnModal(true)}
             onUpdateContactStatut={handleUpdateContactStatut}
             onUpdateAAPStatut={handleUpdateAAPStatut}
           />
@@ -228,6 +256,22 @@ export function App() {
           entityName={activeAddContactEntity.nom}
           onClose={() => setActiveAddContactEntity(null)}
           onAddContact={handleAddContact}
+        />
+      )}
+
+      {showAddOrganisationModal && (
+        <AddOrganisationModal
+          type={activeTab === 'entreprises' ? 'entreprise' : 'aap'}
+          onClose={() => setShowAddOrganisationModal(false)}
+          onAddEntreprise={handleAddEntreprise}
+          onAddAAP={handleAddAAP}
+        />
+      )}
+
+      {showAddColumnModal && (
+        <AddColumnModal
+          onClose={() => setShowAddColumnModal(false)}
+          onAddColumn={handleAddColumn}
         />
       )}
     </div>
