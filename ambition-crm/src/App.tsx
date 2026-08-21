@@ -13,6 +13,7 @@ import { AddContactModal } from './components/AddContactModal';
 import { AddOrganisationModal } from './components/AddOrganisationModal';
 import { AddColumnModal } from './components/AddColumnModal';
 import { AddFeedbackModal } from './components/AddFeedbackModal';
+import { TemplatesModal } from './components/TemplatesModal';
 import { Check, Save } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -40,6 +41,7 @@ export function App() {
   const [showAddOrganisationModal, setShowAddOrganisationModal] = useState<boolean>(false);
   const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
   const [showAddFeedbackModal, setShowAddFeedbackModal] = useState<boolean>(false);
+  const [showTemplatesModal, setShowTemplatesModal] = useState<boolean>(false);
 
   // Inline Cell Editing handler
   const handleCellEdit = (type: 'entreprise' | 'aap' | 'contact' | 'feedback', id: string, field: string, value: string) => {
@@ -238,6 +240,7 @@ export function App() {
         onExport={handleExport}
         onReset={handleReset}
         onSync={handleSync}
+        onOpenTemplates={() => setShowTemplatesModal(true)}
         isSyncing={isSyncing}
       />
 
@@ -389,6 +392,12 @@ export function App() {
         <AddFeedbackModal
           onClose={() => setShowAddFeedbackModal(false)}
           onAddFeedback={handleAddFeedback}
+        />
+      )}
+
+      {showTemplatesModal && (
+        <TemplatesModal
+          onClose={() => setShowTemplatesModal(false)}
         />
       )}
     </div>

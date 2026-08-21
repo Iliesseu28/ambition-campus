@@ -7,7 +7,8 @@ import {
   Download, 
   RotateCcw, 
   Database,
-  MessageSquareDiff
+  MessageSquareDiff,
+  BookOpen
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,6 +24,7 @@ interface HeaderProps {
   onExport: () => void;
   onReset: () => void;
   onSync: () => void;
+  onOpenTemplates: () => void;
   isSyncing?: boolean;
 }
 
@@ -33,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   onExport,
   onReset,
   onSync,
+  onOpenTemplates,
   isSyncing,
 }) => {
   return (
@@ -57,6 +60,18 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-3 text-xs">
+          
+          {/* Guide & Modèles Email/LinkedIn */}
+          <button
+            onClick={onOpenTemplates}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-blue-300 hover:text-white font-semibold transition border border-slate-700 cursor-pointer"
+            title="Voir les modèles de mails et messages LinkedIn"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+            <span>Guide & Modèles (Email / LinkedIn)</span>
+          </button>
+
+          {/* Sync Supabase */}
           <button
             onClick={onSync}
             disabled={isSyncing}
@@ -67,6 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span>{isSyncing ? 'Synchronisation...' : 'Synchroniser Supabase'}</span>
           </button>
 
+          {/* Export */}
           <button
             onClick={onExport}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition border border-slate-700 cursor-pointer"
@@ -76,6 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Exporter Excel</span>
           </button>
 
+          {/* Reset */}
           <button
             onClick={onReset}
             className="p-1.5 rounded-md bg-slate-800 hover:bg-rose-900/60 hover:text-rose-300 text-slate-400 transition border border-slate-700 cursor-pointer"
@@ -139,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Tableau de Bord & Métriques</span>
           </button>
 
-          {/* Section 4 : Retours Site (NEW) */}
+          {/* Section 4 : Retours Site */}
           <button
             onClick={() => setActiveTab('retours')}
             className={`flex items-center gap-2.5 px-5 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
