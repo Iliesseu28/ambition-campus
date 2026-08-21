@@ -7,7 +7,7 @@ import {
   Download, 
   RotateCcw, 
   Database,
-  Layers
+  MessageSquareDiff
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -18,6 +18,7 @@ interface HeaderProps {
     aap: number;
     contacts: number;
     relances: number;
+    feedbacks: number;
   };
   onExport: () => void;
   onReset: () => void;
@@ -85,14 +86,14 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Large Navigation Tabs Section */}
+      {/* Large Navigation Tabs Section (4 Sections) */}
       <div className="px-6 bg-[#F8F9FA] border-b border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <nav className="flex items-center gap-2 -mb-[1px]">
+        <nav className="flex items-center gap-2 -mb-[1px] overflow-x-auto">
           
           {/* Section 1 : Entreprises */}
           <button
             onClick={() => setActiveTab('entreprises')}
-            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 px-5 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'entreprises'
                 ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
@@ -110,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Section 2 : AAP & Fondations */}
           <button
             onClick={() => setActiveTab('aap')}
-            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 px-5 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'aap'
                 ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
@@ -128,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Section 3 : Analytics */}
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center gap-3 px-6 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 px-5 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'analytics'
                 ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
                 : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
@@ -137,17 +138,36 @@ export const Header: React.FC<HeaderProps> = ({
             <BarChart3 className={`w-4 h-4 ${activeTab === 'analytics' ? 'text-blue-600' : 'text-slate-400'}`} />
             <span>Tableau de Bord & Métriques</span>
           </button>
+
+          {/* Section 4 : Retours Site (NEW) */}
+          <button
+            onClick={() => setActiveTab('retours')}
+            className={`flex items-center gap-2.5 px-5 py-3.5 text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === 'retours'
+                ? 'border-blue-600 text-blue-600 bg-white shadow-xs rounded-t-md'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-t-md'
+            }`}
+          >
+            <MessageSquareDiff className={`w-4 h-4 ${activeTab === 'retours' ? 'text-blue-600' : 'text-slate-400'}`} />
+            <span>Retours Site & Suggestions</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+              activeTab === 'retours' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-100 text-amber-800'
+            }`}>
+              {counts.feedbacks}
+            </span>
+          </button>
+
         </nav>
 
         <div className="text-xs text-slate-500 font-medium py-2 hidden lg:flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>{counts.contacts} contacts répertoriés</span>
+            <span>{counts.contacts} contacts</span>
           </div>
           <span className="text-slate-300">|</span>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-            <span>{counts.relances} relances consignées</span>
+            <span>{counts.feedbacks} retours utilisateurs</span>
           </div>
         </div>
       </div>

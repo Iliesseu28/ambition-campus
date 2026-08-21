@@ -70,4 +70,18 @@ export interface Relance {
   statut_suite?: string;
 }
 
-export type ActiveTab = 'entreprises' | 'aap' | 'analytics';
+export interface Feedback {
+  id: string;
+  auteur_nom: string;
+  auteur_email?: string;
+  page_concernee: string;
+  type_retour: 'Bug / Dysfonctionnement' | 'Amélioration / Idée' | 'Design / Ergonomie' | 'Contenu / Texte' | 'Autre';
+  message: string;
+  image_url?: string | null;
+  statut: 'À traiter' | 'En cours' | 'Traité / Validé' | 'Rejeté';
+  reponse_admin?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export type ActiveTab = 'entreprises' | 'aap' | 'analytics' | 'retours';

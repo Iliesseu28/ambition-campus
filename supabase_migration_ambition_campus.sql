@@ -83,3 +83,21 @@ CREATE POLICY "ac_appels_projets_all" ON public.ac_appels_projets FOR ALL USING 
 CREATE POLICY "ac_contacts_all" ON public.ac_contacts FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "ac_relances_all" ON public.ac_relances FOR ALL USING (true) WITH CHECK (true);
 
+
+-- 5. Table des Retours Site & Suggestions Utilisateurs (Section 4)
+CREATE TABLE IF NOT EXISTS public.ac_retours_site (
+    id VARCHAR(50) PRIMARY KEY,
+    auteur_nom VARCHAR(255) NOT NULL,
+    auteur_email VARCHAR(255),
+    page_concernee VARCHAR(255) DEFAULT 'Général',
+    type_retour VARCHAR(100) DEFAULT 'Amélioration / Idée',
+    message TEXT NOT NULL,
+    image_url TEXT,
+    statut VARCHAR(100) DEFAULT 'À traiter',
+    reponse_admin TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.ac_retours_site ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "ac_retours_site_all" ON public.ac_retours_site FOR ALL USING (true) WITH CHECK (true);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ActiveTab, Contact, Relance, Entreprise, AppelProjet, CustomField } from './types';
+import type { ActiveTab, Contact, Relance, Entreprise, AppelProjet, CustomField, Feedback } from './types';
 import { loadData, saveData, resetToDefault } from './lib/storage';
 import type { CRMData } from './lib/storage';
 import { syncWithSupabase } from './lib/sync';
@@ -7,11 +7,13 @@ import { Header } from './components/Header';
 import { EntreprisesTable } from './components/EntreprisesTable';
 import { AppelsProjetsTable } from './components/AppelsProjetsTable';
 import { AnalyticsView } from './components/AnalyticsView';
+import { FeedbacksTable } from './components/FeedbacksTable';
 import { RelanceModal } from './components/RelanceModal';
 import { AddContactModal } from './components/AddContactModal';
 import { AddOrganisationModal } from './components/AddOrganisationModal';
 import { AddColumnModal } from './components/AddColumnModal';
-import { Check, Save, AlertCircle } from 'lucide-react';
+import { AddFeedbackModal } from './components/AddFeedbackModal';
+import { Check, Save } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export function App() {
@@ -37,9 +39,10 @@ export function App() {
 
   const [showAddOrganisationModal, setShowAddOrganisationModal] = useState<boolean>(false);
   const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
+  const [showAddFeedbackModal, setShowAddFeedbackModal] = useState<boolean>(false);
 
   // Inline Cell Editing handler
-  const handleCellEdit = (type: 'entreprise' | 'aap' | 'contact', id: string, field: string, value: string) => {
+  const handleCellEdit = (type: 'entreprise' | 'aap' | 'contact' | 'feedback', id: string, field: string, value: string) => {
     setData((prev) => {
       let updated = { ...prev };
       if (type === 'entreprise') {
@@ -75,6 +78,8 @@ export function App() {
           }
           return c;
         });
+      } else if (type === 'feedback') {
+        updated.feedbacks = prev.feedbacks.map((f) => (f.id === id ? { ...f, [field]: value } : f));
       }
       return updated;
     });
@@ -157,6 +162,22 @@ export function App() {
     setHasUnsavedChanges(true);
   };
 
+  const handleAddFeedback = (newFeedback: Feedback) => {
+    setData((prev) => ({
+      ...prev,
+      feedbacks: [newFeedback, ...prev.feedbacks],
+    }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleUpdateFeedbackStatut = (id: string, statut: Feedback['statut']) => {
+    setData((prev) => ({
+      ...prev,
+      feedbacks: prev.feedbacks.map((f) => (f.id === id ? { ...f, statut } : f)),
+    }));
+    setHasUnsavedChanges(true);
+  };
+
   const handleUpdateAAPStatut = (aapId: string, statut: string) => {
     setData((prev) => ({
       ...prev,
@@ -173,13 +194,13 @@ export function App() {
     XLSX.utils.book_append_sheet(wb, wsAAP, 'Fondations_AAP');
     const wsContacts = XLSX.utils.json_to_sheet(data.contacts);
     XLSX.utils.book_append_sheet(wb, wsContacts, 'Contacts');
-    const wsRelances = XLSX.utils.json_to_sheet(data.relances);
-    XLSX.utils.book_append_sheet(wb, wsRelances, 'Historique_Relances');
-    XLSX.writeFile(wb, `Ambition_Campus_Airtable_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wsFeedbacks = XLSX.utils.json_to_sheet(data.feedbacks);
+    XLSX.utils.book_append_sheet(wb, wsFeedbacks, 'Retours_Site');
+    XLSX.writeFile(wb, `Ambition_Campus_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleReset = () => {
-    if (confirm('Voulez-vous réinitialiser la table avec les 103 cibles qualifiées par défaut ?')) {
+    if (confirm('Voulez-vous réinitialiser la base par défaut ?')) {
       const fresh = resetToDefault();
       setData(fresh);
       setHasUnsavedChanges(false);
@@ -212,6 +233,7 @@ export function App() {
           aap: data.appels_projets.length,
           contacts: data.contacts.length,
           relances: data.relances.length,
+          feedbacks: data.feedbacks.length,
         }}
         onExport={handleExport}
         onReset={handleReset}
@@ -293,6 +315,15 @@ export function App() {
             relances={data.relances}
           />
         )}
+
+        {activeTab === 'retours' && (
+          <FeedbacksTable
+            feedbacks={data.feedbacks}
+            onOpenAddFeedback={() => setShowAddFeedbackModal(true)}
+            onUpdateFeedbackStatut={handleUpdateFeedbackStatut}
+            onCellEdit={handleCellEdit}
+          />
+        )}
       </main>
 
       {/* Sticky Bottom Floating Save Bar */}
@@ -351,6 +382,13 @@ export function App() {
         <AddColumnModal
           onClose={() => setShowAddColumnModal(false)}
           onAddColumn={handleAddColumn}
+        />
+      )}
+
+      {showAddFeedbackModal && (
+        <AddFeedbackModal
+          onClose={() => setShowAddFeedbackModal(false)}
+          onAddFeedback={handleAddFeedback}
         />
       )}
     </div>
