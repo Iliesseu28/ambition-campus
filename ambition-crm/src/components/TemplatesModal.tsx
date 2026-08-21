@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Link2, Copy, Check, Sparkles, BookOpen, Send } from 'lucide-react';
+import { X, Mail, Link2, Copy, Check, Sparkles, BookOpen } from 'lucide-react';
 
 interface TemplatesModalProps {
   onClose: () => void;
@@ -7,7 +7,7 @@ interface TemplatesModalProps {
 
 export const TemplatesModal: React.FC<TemplatesModalProps> = ({ onClose }) => {
   const [activeChannel, setActiveChannel] = useState<'email' | 'linkedin'>('email');
-  const [activeAngle, setActiveAngle] = useState<'impact' | 'partenaires' | 'talents'>('impact');
+  const [activeAngle, setActiveAngle] = useState<'partenariat' | 'preuve_sociale' | 'fondation'>('partenariat');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (text: string, id: string) => {
@@ -17,132 +17,118 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({ onClose }) => {
   };
 
   const emailTemplates = {
-    impact: {
-      title: "Variante A : Chiffres Clés, Mesure d'Impact & ROI Social",
-      objet: "[Impact 2026] 1 € investi = 5,30 € d'impact direct / Ambition Campus",
-      objetAlt: "500+ lycéens propulsés vers l'excellence : les chiffres 2026 d'Ambition Campus",
+    partenariat: {
+      title: "Variante 1 : Prise de contact Partenariat & Synergie Métier (Recommandé)",
+      objet: "Prise de contact / Proposition de partenariat mécénat avec Ambition Campus",
+      objetAlt: "[Partenariat 2026] Échanger avec Ambition Campus & [Nom Entreprise]",
       body: `Bonjour [Prénom] [Nom],
 
-Depuis 17 ans, notre association Ambition Campus (Loi 1901 / ESS, 100 % bénévole) prouve qu'un accompagnement méthodique brise le plafond de verre des lycéens issus de milieux populaires (QPV / 36 lycées REP partenaires).
+Je me permets de prendre contact avec vous aujourd'hui dans l’optique d’étudier la mise en place d'un partenariat entre [Nom Entreprise / Organisation] et notre association Ambition Campus.
 
-Voici le bilan chiffré de notre promotion 2026 :
-- 500+ lycéens accompagnés par 525 binômes de mentorat actifs.
-- 21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes préparatoires d'élite (Henri IV, Saint-Louis, Lakanal).
-- Social ROI certifié : 1 € investi = 5,30 € de valeur d'accompagnement terrain (coût net : 35 € / an par jeune).
-- Note de satisfaction : 9,2 / 10 mesurée auprès des lycéens et des 75 mentors.
+Depuis 17 ans, notre association d'intérêt général (100 % bénévole) œuvre pour l'égalité des chances en accompagnant chaque année plus de 500 lycéens issus de quartiers prioritaires (36 lycées REP partenaires) pour les aider à surmonter l'autocensure et intégrer les filières sélectives de l'enseignement supérieur (Sciences Po Paris, filières d'excellence universitaire, CPGE, grandes écoles).
 
-Pourquoi un partenariat avec [Nom Entreprise / Fondation] fait sens :
-[Insérer angle de pitch personnalisé ou synergie métier]
+En découvrant vos engagements RSE et vos initiatives en faveur de l'inclusion, nous avons identifié de fortes synergies entre nos missions respectives :
+- Mobilisation de vos collaborateurs : Participation de vos équipes à nos jurys d'oraux blancs et simulations d'entretiens.
+- Parrainage & Mécénat : Soutien direct à l'accompagnement des jeunes (bénéficiant du cadre fiscal avantageux du mécénat d'entreprise avec 60 % de déduction sur l'IS).
 
-Levier fiscal (Art. 238 bis CGI) : 60 % de déduction sur l'impôt sur les sociétés (un soutien de 10 000 € ne vous revient qu'à 4 000 € net).
+Vous trouverez en pièce jointe notre document de présentation synthétique résumant nos actions terrain et nos résultats.
 
-Vous trouverez ci-joint notre fiche synthétique A4 résumant nos résultats et nos besoins de financement.
+Seriez-vous disponible pour un court échange téléphonique ou visio de 15 minutes la semaine prochaine (ex : mardi ou jeudi) afin que nous puissions faire connaissance et en discuter ?
 
-Seriez-vous disponible pour un court échange téléphonique de 15 minutes la semaine prochaine (ex: mardi ou jeudi matin) ?
+En vous remerciant pour votre écoute et votre attention, je vous souhaite une excellente journée.
 
 Bien cordialement,
 
-Ilias Khafague
-Pôle Partenariats & Financements — Ambition Campus
+L'équipe Ambition Campus
+Pôle Partenariats & Financements
 ambitioncampus@gmail.com | 06 98 99 62 00
 https://ambitioncampus.com`
     },
-    partenaires: {
-      title: "Variante B : Preuve Sociale & Cercle des Mécènes Historiques",
-      objet: "PwC, Deloitte, Banque de France : rejoindre les mécènes d'Ambition Campus",
-      objetAlt: "[Mécénat 2026-2027] Devenir Mécène Partenaire Officiel d'Ambition Campus",
+    preuve_sociale: {
+      title: "Variante 2 : Preuve Sociale & Invitation Cercle Partenaires",
+      objet: "Proposition d'échange & Partenariat avec Ambition Campus",
+      objetAlt: "PwC, Deloitte, Banque de France : associer [Nom Entreprise] à Ambition Campus",
       body: `Bonjour [Prénom] [Nom],
 
-Des institutions comme PwC, EY, Deloitte, KPMG ou la Banque de France collaborent déjà activement avec Ambition Campus en mobilisant leurs collaborateurs pour nos simulations d'oraux blancs.
+Je vous contacte au nom d'Ambition Campus avec le souhait d'échanger avec vous sur la mise en place d'un partenariat pour l'année 2026-2027.
 
-Depuis 17 ans, notre association 100 % bénévole accompagne chaque année plus de 500 lycéens issus de 36 lycées partenaires (Paris/IDF, Reims, Poitiers, Menton) vers les filières sélectives du supérieur.
+Notre association mobilise déjà des partenaires de référence comme PwC, Deloitte, EY ou la Banque de France, dont les collaborateurs s'engagent à nos côtés lors de nos sessions d'oraux blancs et d'ateliers d'éloquence.
 
-En 2026, cette mobilisation conjointe a permis des résultats historiques :
-- 21 lycéens admis à Sciences Po Paris, 17 à La Sorbonne, 13 en prépas d'élite.
-- Plus de 210 oraux blancs et jurys d'admission organisés sur l'année.
-- 100 % de transparence : zéro frais administratif, l'intégralité des dons finance directement les actions terrain des jeunes.
+Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
 
-Nous souhaitons aujourd'hui élargir notre cercle de partenaires et vous proposer d'associer [Nom Entreprise / Fondation] au parrainage officiel de notre promotion 2026-2027 (convention annuelle, visibilité RSE, jurys VIP et déduction fiscale de 60 % sur l'IS).
+Nous aimerions beaucoup associer [Nom Entreprise] à cette dynamique pour :
+1. Ouvrir vos métiers à des lycéens méritants et motivés.
+2. Permettre à vos collaborateurs de s'impliquer dans une action concrète et valorisante.
+3. Construire une convention de mécénat sur-mesure pour votre structure.
 
-Vous trouverez en pièce jointe notre document de présentation A4.
+Notre plaquette de présentation A4 est jointe à ce message pour vous donner une vision d'ensemble.
 
-Auriez-vous 15 minutes la semaine prochaine pour un premier échange d'introduction ?
+Auriez-vous 15 minutes à nous accorder ces prochains jours pour que nous puissions échanger ensemble à ce sujet ?
 
 Bien cordialement,
 
-Ilias Khafague
-Pôle Partenariats & Financements — Ambition Campus
+L'équipe Ambition Campus
+Pôle Partenariats & Financements
 ambitioncampus@gmail.com | 06 98 99 62 00
 https://ambitioncampus.com`
     },
-    talents: {
-      title: "Variante C : Marque Employeur, Diversité & Concours d'Éloquence",
-      objet: "[Diversité & Talents] Ouvrir vos métiers aux lycéens d'excellence avec Ambition Campus",
-      objetAlt: "Briser l'autocensure : parrainez la promo 2026-2027 d'Ambition Campus",
+    fondation: {
+      title: "Variante 3 : Orientation Fondations & Appels à Projets",
+      objet: "Présentation d'Ambition Campus & Demande d'échange partenarial",
+      objetAlt: "[Égalité des chances] Proposition de collaboration avec la [Nom Fondation]",
       body: `Bonjour [Prénom] [Nom],
 
-L'autocensure reste aujourd'hui le premier obstacle qui prive les grandes entreprises de profils brillants issus des quartiers populaires.
+Je prends attache avec vous dans l'optique d'un potentiel partenariat entre la [Nom de la Fondation] et l'association Ambition Campus.
 
-Depuis 2008, Ambition Campus forme plus de 500 lycéens par an aux codes de l'excellence académique et professionnelle à travers :
-- Des modules intensifs d'art oratoire et d'éloquence (méthode Ethos / Pathos / Logos).
-- Des immersions professionnelles et découvertes des métiers de cadre et dirigeant.
-- Un accompagnement individuel par 75 mentors engagés.
+En consultant les priorités philanthropiques de votre fondation (notamment autour de l'éducation, de la jeunesse et de l'égalité des chances), notre action terrain auprès de plus de 500 lycéens issus de 36 lycées REP fait particulièrement écho à vos critères d'intervention.
 
-Les résultats 2026 :
-- 21 admis à Sciences Po Paris, 17 à La Sorbonne (Droit/Éco), 13 en classes prépas d'élite.
-- Une note de satisfaction de 9,2 / 10 par les élèves et leurs mentors.
-- Coût net par élève : seulement 35 € / an grâce à notre modèle 100 % bénévole.
+Notre démarche vise à donner aux jeunes issus de quartiers prioritaires les méthodes académiques, la maîtrise de l'art oratoire et le mentorat individuel indispensables pour réussir les filières les plus sélectives.
 
-En soutenant Ambition Campus (déduction IS de 60 % via l'Art. 238 bis CGI), vous financez l'ascension sociale de ces jeunes tout en valorisant vos engagements RSE et votre marque employeur auprès de futurs talents.
+Vous trouverez ci-joint notre dossier de présentation résumant notre modèle associatif 100 % bénévole, notre coût d'intervention maîtrisé (35 € / an par jeune) et notre bilan d'admissions 2026.
 
-Vous trouverez ci-joint notre plaquette synthétique A4.
+Serait-il possible de convenir d'un court entretien téléphonique de 15 minutes afin de vous présenter notre projet plus en détail et recueillir vos conseils sur les modalités de collaboration ?
 
-Seriez-vous disponible pour un court échange de 15 minutes la semaine prochaine afin d'en discuter ?
+En vous remerciant chaleureusement pour votre temps et votre intérêt.
 
-Bien cordialement,
+Très cordialement,
 
-Ilias Khafague
-Pôle Partenariats & Financements — Ambition Campus
+L'équipe Ambition Campus
+Pôle Partenariats & Financements
 ambitioncampus@gmail.com | 06 98 99 62 00
 https://ambitioncampus.com`
     }
   };
 
   const linkedinTemplates = {
-    impact: {
-      title: "Approche Directe / InMail (Angle Chiffres & Impact)",
+    partenariat: {
+      title: "Message direct / InMail (Chaleureux & Professionnel)",
       body: `Bonjour [Prénom],
 
-Je vous contacte car vos engagements RSE et d'inclusion chez [Nom Entreprise] résonnent avec la mission d'Ambition Campus.
+Je me permets de vous contacter dans l'optique d'étudier un potentiel partenariat entre [Nom Entreprise] et notre association Ambition Campus.
 
-Depuis 17 ans, nous accompagnons plus de 500 lycéens issus de 36 lycées REP vers les filières sélectives (21 admis à Sciences Po Paris, 17 à La Sorbonne en 2026).
+Depuis 17 ans, nous accompagnons bénévolement plus de 500 lycéens issus de milieux populaires (36 lycées REP) vers les filières sélectives (Sciences Po Paris, Sorbonne, CPGE).
 
-Coût moyen : 35 € / an par élève, pour un Social ROI certifié de 1 € = 5,30 € d'impact.
-
-Seriez-vous ouvert(e) à un court échange de 10 minutes la semaine prochaine pour découvrir notre modèle de parrainage mécénat ?
-
-Bien à vous,
-Ilias Khafague — Ambition Campus`
-    },
-    partenaires: {
-      title: "Message de Connexion Réseau (300 caractères max)",
-      body: `Bonjour [Prénom],
-PwC, Deloitte et la Banque de France mobilisent déjà leurs équipes avec Ambition Campus pour coacher 500+ lycéens REP vers les grandes écoles.
-Ravi d'échanger avec vous sur vos initiatives RSE chez [Nom Entreprise] !
-Ilias (Ambition Campus)`
-    },
-    talents: {
-      title: "Invitation Jury VIP / Mentorat Pro",
-      body: `Bonjour [Prénom],
-
-Chez Ambition Campus, nous préparons chaque année 500+ lycéens talentueux aux concours d'éloquence et aux oraux d'admission des grandes filières.
-
-Nous serions ravis de convier [Nom Entreprise] à composer l'un de nos jurys d'oraux blancs ou à parrainer notre promotion 2026-2027.
-
-Auriez-vous un moment la semaine prochaine pour en parler brièvement ?
+Des structures comme PwC ou Deloitte mobilisent déjà leurs équipes avec nous lors de nos oraux blancs. Seriez-vous ouvert(e) à un court échange de 10-15 minutes la semaine prochaine pour faire connaissance et voir si une collaboration ferait sens pour vous ?
 
 Très belle journée,
-Ilias Khafague`
+L'équipe Ambition Campus`
+    },
+    preuve_sociale: {
+      title: "Note de demande de connexion (Moins de 300 caractères)",
+      body: `Bonjour [Prénom], je vous contacte pour échanger sur un partenariat entre [Nom Entreprise] et l'association Ambition Campus (500+ lycéens REP coachés vers les grandes écoles). Ravi de vous ajouter à mon réseau pour en discuter ! L'équipe Ambition Campus`
+    },
+    fondation: {
+      title: "Invitation Jury VIP & Découverte Métiers",
+      body: `Bonjour [Prénom],
+
+Chez Ambition Campus, nous préparons chaque année plus de 500 lycéens talentueux aux concours d'éloquence et aux oraux d'admission des grandes filières.
+
+Dans le cadre de nos actions 2026-2027, nous serions ravis de convier [Nom Entreprise] à composer l'un de nos jurys d'oraux blancs ou à parrainer notre promotion.
+
+Auriez-vous un moment la semaine prochaine pour en parler brièvement lors d'un court échange ?
+
+Très belle journée,
+L'équipe Ambition Campus`
     }
   };
 
@@ -201,36 +187,36 @@ Ilias Khafague`
 
           {/* Angle Filter */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-500 text-[11px]">Angle d'accroche :</span>
+            <span className="font-semibold text-slate-500 text-[11px]">Angle d'approche :</span>
             <button
-              onClick={() => setActiveAngle('impact')}
+              onClick={() => setActiveAngle('partenariat')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer border ${
-                activeAngle === 'impact'
+                activeAngle === 'partenariat'
                   ? 'bg-blue-50 text-blue-700 border-blue-300'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              1. Chiffres & ROI Social
+              1. Partenariat & Synergie (Recommandé)
             </button>
             <button
-              onClick={() => setActiveAngle('partenaires')}
+              onClick={() => setActiveAngle('preuve_sociale')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer border ${
-                activeAngle === 'partenaires'
+                activeAngle === 'preuve_sociale'
                   ? 'bg-blue-50 text-blue-700 border-blue-300'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              2. Preuve Sociale (PwC, Deloitte...)
+              2. Preuve Sociale (PwC, Deloitte, BDF...)
             </button>
             <button
-              onClick={() => setActiveAngle('talents')}
+              onClick={() => setActiveAngle('fondation')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer border ${
-                activeAngle === 'talents'
+                activeAngle === 'fondation'
                   ? 'bg-blue-50 text-blue-700 border-blue-300'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              3. Marque Employeur & Éloquence
+              3. Fondations & Appels à Projets
             </button>
           </div>
 
@@ -260,7 +246,7 @@ Ilias Khafague`
                     <span>{emailTemplates[activeAngle].objet}</span>
                     <button
                       onClick={() => handleCopy(emailTemplates[activeAngle].objet, `obj1_${activeAngle}`)}
-                      className="text-slate-400 hover:text-blue-600 ml-2"
+                      className="text-slate-400 hover:text-blue-600 ml-2 cursor-pointer"
                     >
                       <Copy className="w-3 h-3" />
                     </button>
@@ -273,7 +259,7 @@ Ilias Khafague`
                     <span>{emailTemplates[activeAngle].objetAlt}</span>
                     <button
                       onClick={() => handleCopy(emailTemplates[activeAngle].objetAlt, `obj2_${activeAngle}`)}
-                      className="text-slate-400 hover:text-blue-600 ml-2"
+                      className="text-slate-400 hover:text-blue-600 ml-2 cursor-pointer"
                     >
                       <Copy className="w-3 h-3" />
                     </button>
@@ -321,9 +307,9 @@ Ilias Khafague`
               <span>Protocole d'envoi & bonnes pratiques pour l'équipe</span>
             </h4>
             <ul className="list-disc list-inside text-blue-950 text-[11px] space-y-1">
-              <li><b>J0 (Prise de contact) :</b> Envoyer l'email principal avec la plaquette PDF Ambition Campus en pièce jointe et passer le statut du contact à <code>Contacté (J0)</code>.</li>
+              <li><b>J0 (Prise de contact) :</b> Envoyer l'email de prise de contact avec la plaquette PDF Ambition Campus en pièce jointe et passer le statut du contact à <code>Contacté (J0)</code>.</li>
               <li><b>J+7 (Relance 1) :</b> Si pas de réponse sous 7 jours, envoyer une relance courte ou une approche LinkedIn personnalisée.</li>
-              <li><b>J+15 (Relance 2) :</b> Dernière relance avec proposition d'invitation jury ou d'échange téléphonique de 10 min.</li>
+              <li><b>J+15 (Relance 2) :</b> Dernière relance avec proposition d'invitation jury ou d'échange téléphonique de 10-15 min.</li>
               <li><b>Mise à jour :</b> Toujours consigner la date et le canal via le bouton <b>« Relancer »</b> de la ligne correspondante.</li>
             </ul>
           </div>

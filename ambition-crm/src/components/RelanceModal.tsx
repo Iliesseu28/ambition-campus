@@ -32,7 +32,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
   );
 
   const handleGeneratePitch = () => {
-    const generated = `Bonjour ${contact.nom},\n\nJe me permets de vous contacter au sujet d'Ambition Campus, association loi 1901 accompagnant plus de 500 lycéens issus de 36 lycées REP vers les filières d'excellence (Sciences Po Paris, CPGE, La Sorbonne).\n\n${pitchAngle ? `Concernant ${entityName} : ${pitchAngle}\n\n` : ''}Seriez-vous disponible pour un court échange de 15 minutes la semaine prochaine afin d'échanger sur les modalités de partenariat pour la promotion 2026-2027 ?\n\nBien cordialement,\nL'équipe Ambition Campus\nambitioncampus@gmail.com | 06 98 99 62 00`;
+    const generated = `Bonjour ${contact.nom},\n\nJe me permets de prendre contact avec vous aujourd'hui dans l'optique d'étudier la mise en place d'un partenariat entre ${entityName} et notre association Ambition Campus.\n\nDepuis 17 ans, notre association d'intérêt général (100 % bénévole) accompagne chaque année plus de 500 lycéens issus de 36 lycées REP pour les aider à surmonter l'autocensure et intégrer les filières d'excellence (Sciences Po Paris, CPGE, La Sorbonne).\n\n${pitchAngle ? `Concernant ${entityName} : ${pitchAngle}\n\n` : ''}Seriez-vous disponible pour un court échange téléphonique ou visio de 15 minutes la semaine prochaine afin que nous puissions faire connaissance et en discuter ?\n\nBien cordialement,\nL'équipe Ambition Campus\nPôle Partenariats & Financements\nambitioncampus@gmail.com | 06 98 99 62 00`;
     setMessage(generated);
   };
 
