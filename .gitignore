@@ -1,0 +1,5 @@
+# Secrets — jamais dans le repo (public)
+docs/SECRETS.local.md
+*.local.md
+.env
+.env.*
