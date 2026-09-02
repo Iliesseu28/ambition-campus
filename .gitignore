@@ -3,3 +3,20 @@ docs/SECRETS.local.md
 *.local.md
 .env
 .env.*
+
+# Dependencies & Virtual Environments
+.venv/
+env/
+venv/
+node_modules/
+dist/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS Files
+.DS_Store
+Thumbs.db

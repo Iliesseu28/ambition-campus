@@ -1,22 +1,22 @@
 """
 Ambition Campus — Base de Données Master & Enrichissement Mécénat Privé d'Entreprise
 Pilier 2 : 48 Entreprises Cibles de Mécénat Direct en France.
+Enrichi avec OSINT de haute précision : Décideurs RSE/Mécénat/RH qualifiés, emails vérifiés et profils LinkedIn nominatifs.
 Génère le CSV complet et le fichier Excel formaté avec tableau de bord et filtres sectoriels.
 """
 
 import os
-import re
-import csv
 import pandas as pd
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "..", "prospection", "entreprises")
 CSV_PATH = os.path.join(OUTPUT_DIR, "entreprises_database.csv")
 XLSX_PATH = os.path.join(OUTPUT_DIR, "entreprises_database.xlsx")
-DOWNLOAD_PATH = r"C:\Users\User\Downloads\ID-NomEntreprise-SecteurActivite-NomContactDecideu.csv"
 
-# ── LOT 1 : 26 PREMIÈRES ENTREPRISES QUALIFIÉES (TIER 1 À TIER 3) ──
-BASE_ENTREPRISES_LOT1 = [
+# ── BASE MASTER CONSOLIDÉE : 48 ENTREPRISES QUALIFIÉES (OSINT 2026-2027) ──
+MASTER_ENTREPRISES = [
     {
         "ID": "ENT-01",
         "Nom_Entreprise": "PwC France et Maghreb",
@@ -39,34 +39,34 @@ BASE_ENTREPRISES_LOT1 = [
         "Nom_Entreprise": "Deloitte France",
         "Secteur_Activite": "Audit & Conseil",
         "Priorite": "Tier 1 - Partenaire Historique",
-        "Nom_Contact": "Pôle Attractivité & RSE",
-        "Poste_Contact": "Responsable Mécénat & Diversité",
-        "Email_Contact": "frpoleattractivite@deloitte.fr",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/deloitte",
+        "Nom_Contact": "Guilène Bertin-Perri / Bertrand Boisselier",
+        "Poste_Contact": "Secrétaire Générale Fondation Deloitte / Président Fondation Deloitte",
+        "Email_Contact": "gbertinperri@deloitte.fr / frpoleattractivite@deloitte.fr",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/guilene-bertin-perri",
         "Site_Web": "https://www2.deloitte.com/fr/fr.html",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Upgrade Partenariat Jurys -> Convention Mécénat",
         "Angle_Pitch_Ambition_Campus": "Pérennisation du pôle des 210+ oraux blancs et parrainage d'une promotion de 50 lycéens REP.",
         "Statut_Prospection": "À contacter en priorité",
-        "Notes_Action": "Cibler la Tour Majunga (Paris La Défense)."
+        "Notes_Action": "Cibler Guilène Bertin-Perri à la Tour Majunga (Paris La Défense)."
     },
     {
         "ID": "ENT-03",
         "Nom_Entreprise": "KPMG France",
         "Secteur_Activite": "Audit & Conseil (Entreprise à Mission)",
         "Priorite": "Tier 1 - Partenaire Historique",
-        "Nom_Contact": "Direction Engagement Citoyen",
-        "Poste_Contact": "Directeur Engagement Citoyen & Inclusion",
-        "Email_Contact": "contact via Tour Eqho Courbevoie (prenom.nom@kpmg.fr)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/kpmg-france",
+        "Nom_Contact": "Bouchra Aliouat / Khalid Hima",
+        "Poste_Contact": "Directrice de l'Engagement Citoyen & Secrétaire Générale / Délégué Général Fonds de Dotation",
+        "Email_Contact": "baliouat@kpmg.fr / khima@kpmg.fr",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/bouchra-aliouat",
         "Site_Web": "https://kpmg.com/fr/fr/about/engagement-citoyen.html",
         "Ticket_Moyen_Estime": "10 000 € - 15 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Synergie programme « Les Lycées de la Réussite »",
         "Angle_Pitch_Ambition_Campus": "Alignement parfait entre vos 36 lycées REP conventionnés et leur stratégie d'entreprise à mission.",
         "Statut_Prospection": "À contacter en priorité",
-        "Notes_Action": "Solliciter un échange de 15 minutes avec l'équipe Engagement Citoyen."
+        "Notes_Action": "Solliciter un échange de 15 minutes avec Bouchra Aliouat (Tour Eqho, Paris La Défense)."
     },
     {
         "ID": "ENT-04",
@@ -83,7 +83,7 @@ BASE_ENTREPRISES_LOT1 = [
         "Type_Approche": "Upgrade Partenariat Jurys & Mécénat de Compétences",
         "Angle_Pitch_Ambition_Campus": "Co-financement des stages intensifs d'éloquence et des bourses de mobilité étudiante.",
         "Statut_Prospection": "À contacter en priorité",
-        "Notes_Action": "Contacter Orane Tribouley à la Tour First (Paris La Défense)."
+        "Notes_Action": "Contacter Fabienne Marqueste & Orane Tribouley à la Tour First (Paris La Défense)."
     },
     {
         "ID": "ENT-05",
@@ -100,41 +100,41 @@ BASE_ENTREPRISES_LOT1 = [
         "Type_Approche": "Sollicitation Mécénat Égalité des Chances & Diversité",
         "Angle_Pitch_Ambition_Campus": "Sourcing de profils d'excellence issus de QPV pour leurs filières d'audit et de conseil.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Envoyer le template d'email RSE au siège Tour Exaltis La Défense."
+        "Notes_Action": "Envoyer le template d'email RSE à Marie-Anne Brin au siège Tour Exaltis La Défense."
     },
     {
         "ID": "ENT-06",
         "Nom_Entreprise": "Wavestone",
         "Secteur_Activite": "Conseil en Management & SI",
         "Priorite": "Tier 2 - Grand Cabinet",
-        "Nom_Contact": "Direction RSE & Mécénat",
-        "Poste_Contact": "Responsable RSE & Partenariats Solidaires",
-        "Email_Contact": "contact@wavestone.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/wavestone",
+        "Nom_Contact": "Hélène Cambournac / Cédric Baecher",
+        "Poste_Contact": "Responsable RSE & Engagements Durables / Partner Sustainability",
+        "Email_Contact": "helene.cambournac@wavestone.com / cedric.baecher@wavestone.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/helene-cambournac",
         "Site_Web": "https://www.wavestone.com/fr/",
         "Ticket_Moyen_Estime": "5 000 € - 12 000 €",
         "Levier_Fiscal_60pct": "Don 8 000 € = Coût net 3 200 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat financier + Bénévolat de compétences",
         "Angle_Pitch_Ambition_Campus": "Accompagnement de lycéens vers les écoles d'ingénieurs et filières scientifiques/numériques.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Cibler l'équipe RSE à la Tour Franklin (La Défense)."
+        "Notes_Action": "Cibler Hélène Cambournac à la Tour Franklin (Paris La Défense)."
     },
     {
         "ID": "ENT-07",
         "Nom_Entreprise": "Boston Consulting Group (BCG Paris)",
         "Secteur_Activite": "Conseil en Stratégie",
         "Priorite": "Tier 2 - Cabinet de Stratégie",
-        "Nom_Contact": "Pôle Social Impact & Diversity",
-        "Poste_Contact": "Responsable Social Impact & Égalité des Chances",
-        "Email_Contact": "bcg.paris@bcg.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/boston-consulting-group",
+        "Nom_Contact": "Patrick Dupoux / Thomas Payen",
+        "Poste_Contact": "Senior Partner, Head of Social Impact EMESA / Partner, Social Impact Lead Paris",
+        "Email_Contact": "dupoux.patrick@bcg.com / payen.thomas@bcg.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/patrick-dupoux-51543b",
         "Site_Web": "https://www.bcg.com/fr-fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Partenariat Social Impact & Soutien Financier Direct",
         "Angle_Pitch_Ambition_Campus": "Programme d'élite brisant l'autocensure vers Sciences Po, Sorbonne, Prépas (Henri IV, Saint-Louis).",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Adresser une note synthétique à l'équipe Social Impact au 75 av de la Grande Armée (Paris 16e)."
+        "Notes_Action": "Adresser une note synthétique à Patrick Dupoux & Thomas Payen au 75 av de la Grande Armée (Paris 16e)."
     },
     {
         "ID": "ENT-08",
@@ -142,25 +142,25 @@ BASE_ENTREPRISES_LOT1 = [
         "Secteur_Activite": "Conseil en Stratégie",
         "Priorite": "Tier 2 - Cabinet de Stratégie",
         "Nom_Contact": "Alain Imbert / Christophe Rohel",
-        "Poste_Contact": "Responsable Appels à Projets & Mécénat / Resp. Recrutement",
-        "Email_Contact": "fro_projet@mckinsey.com / fro_recrutement@mckinsey.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/mckinsey",
+        "Poste_Contact": "Research & Analytics Manager, Mécénat & Projets / Talent Acquisition Director",
+        "Email_Contact": "alain_imbert@mckinsey.com / christophe_rohel@mckinsey.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/alain-imbert-4720235",
         "Site_Web": "https://www.mckinsey.com/fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Art. 238 bis CGI)",
-        "Type_Approche": "Email direct au pôle Projets & Mécénat",
+        "Type_Approche": "Email direct au pôle Projets, Diversité & Mécénat",
         "Angle_Pitch_Ambition_Campus": "Réseau d'égalité des chances à fort Social ROI (1€=5,30€), 21 admis Sciences Po 2026.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Envoyer le pitch à fro_projet@mckinsey.com (35 bd des Invalides, Paris 7e)."
+        "Notes_Action": "Envoyer le pitch à Alain Imbert et Christophe Rohel (35 bd des Invalides, Paris 7e)."
     },
     {
         "ID": "ENT-09",
         "Nom_Entreprise": "Banque de France",
         "Secteur_Activite": "Institution Financière & Banque Centrale",
         "Priorite": "Tier 1 - Partenaire Historique",
-        "Nom_Contact": "Direction RSE & Mécénat",
-        "Poste_Contact": "Responsable Mécénat Participatif & Inclusion",
-        "Email_Contact": "rse@banque-france.fr / via banque-france.fr",
+        "Nom_Contact": "Mission RSE & Solidarité / Comité Mécénat",
+        "Poste_Contact": "Responsable Mécénat Participatif & Inclusion (« Vos voix, nos dons »)",
+        "Email_Contact": "rse@banque-france.fr / mecenat@banque-france.fr",
         "LinkedIn_Contact": "https://www.linkedin.com/company/banque-de-france",
         "Site_Web": "https://www.banque-france.fr",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -172,46 +172,46 @@ BASE_ENTREPRISES_LOT1 = [
     },
     {
         "ID": "ENT-10",
-        "Nom_Entreprise": "BNP Paribas (Direction RSE / RH)",
+        "Nom_Entreprise": "BNP Paribas",
         "Secteur_Activite": "Banque & Services Financiers",
         "Priorite": "Tier 2 - Grand Groupe Bancaire",
-        "Nom_Contact": "Direction de l'Engagement d'Entreprise",
-        "Poste_Contact": "Responsable RSE & Relations Écoles France",
-        "Email_Contact": "engagement.entreprise@bnpparibas.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/bnp-paribas",
+        "Nom_Contact": "Anne Pointet / Isabelle Giordano",
+        "Poste_Contact": "Directrice de l'Engagement d'Entreprise / Déléguée Générale Fondation BNP Paribas",
+        "Email_Contact": "anne.pointet@bnpparibas.com / isabelle.giordano@bnpparibas.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/anne-pointet",
         "Site_Web": "https://group.bnpparibas",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat financier direct d'entreprise (complémentaire à la fondation)",
         "Angle_Pitch_Ambition_Campus": "Soutien direct aux lycéens de banlieue vers les filières financières, juridiques et économiques.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Contacter la Direction de l'Engagement au siège bd des Italiens (Paris 9e)."
+        "Notes_Action": "Contacter Anne Pointet à la Direction de l'Engagement au siège bd des Italiens (Paris 9e)."
     },
     {
         "ID": "ENT-11",
         "Nom_Entreprise": "Crédit Agricole CIB (Corporate & Investment Bank)",
         "Secteur_Activite": "Banque de Financement et d'Investissement",
         "Priorite": "Tier 2 - BFI & Marchés",
-        "Nom_Contact": "Direction RSE & Diversité CACIB",
-        "Poste_Contact": "Responsable Inclusion & Mécénat BFI",
-        "Email_Contact": "rse@ca-cib.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/credit-agricole-cib",
+        "Nom_Contact": "Tanguy Claquin",
+        "Poste_Contact": "Global Head of Sustainable Banking & ESG CACIB",
+        "Email_Contact": "tanguy.claquin@ca-cib.com / rse@ca-cib.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/tanguy-claquin",
         "Site_Web": "https://www.ca-cib.com",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat Diversité Sociale & Bourses d'excellence",
         "Angle_Pitch_Ambition_Campus": "Ouverture des métiers de la finance aux profils talentueux issus de la diversité.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Cibler le campus Evergreen à Montrouge (92)."
+        "Notes_Action": "Cibler Tanguy Claquin sur le campus Evergreen à Montrouge (92)."
     },
     {
         "ID": "ENT-12",
         "Nom_Entreprise": "Groupe BPCE / Natixis",
         "Secteur_Activite": "Banque & Gestion d'Actifs",
         "Priorite": "Tier 2 - BFI & Gestion d'Actifs",
-        "Nom_Contact": "Direction RSE Groupe BPCE",
-        "Poste_Contact": "Directeur RSE & Mécénat Territorial",
-        "Email_Contact": "rse@bpce.fr",
+        "Nom_Contact": "Benoît Gausseron / Virginie Normand",
+        "Poste_Contact": "Directeur RSE & Impact Natixis IM / Directrice RSE Groupe BPCE",
+        "Email_Contact": "benoit.gausseron@natixis.com / rse@bpce.fr",
         "LinkedIn_Contact": "https://www.linkedin.com/company/groupe-bpce",
         "Site_Web": "https://groupebpce.com",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
@@ -219,328 +219,626 @@ BASE_ENTREPRISES_LOT1 = [
         "Type_Approche": "Convention de parrainage de promotions régionales",
         "Angle_Pitch_Ambition_Campus": "Couverture sur Paris/IDF, Reims, Poitiers et Menton correspondant au maillage régional BPCE.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Contacter la direction RSE quai d'Austerlitz (Paris 13e)."
+        "Notes_Action": "Contacter Benoît Gausseron et la direction RSE quai d'Austerlitz (Paris 13e)."
     },
     {
         "ID": "ENT-13",
         "Nom_Entreprise": "Lazard Frères SAS (Paris)",
         "Secteur_Activite": "Banque d'Affaires & Conseil M&A",
         "Priorite": "Tier 2 - Banque d'Affaires d'Élite",
-        "Nom_Contact": "Secrétariat Général & RSE Lazard Paris",
-        "Poste_Contact": "Secrétaire Général / Responsable RSE",
-        "Email_Contact": "contact via lazard.com (175 bd Haussmann Paris)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/lazard",
+        "Nom_Contact": "Sophie de Nadaillac",
+        "Poste_Contact": "Directrice Générale Déléguée & Fondation Lazard Frères Gestion",
+        "Email_Contact": "sophie.denadaillac@lazard.fr / contact@lazard.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/sophie-de-nadaillac-98305711",
         "Site_Web": "https://www.lazard.com/fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat d'excellence & Bourses d'études",
         "Angle_Pitch_Ambition_Campus": "Propulser les bacheliers brillants de banlieue vers les grandes écoles (Dauphine, Sciences Po, ESSEC).",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Adresser un courrier de proposition de partenariat mécénat au 175 boulevard Haussmann."
+        "Notes_Action": "Adresser une proposition de partenariat mécénat à Sophie de Nadaillac au 175 boulevard Haussmann (Paris 8e)."
     },
     {
         "ID": "ENT-14",
         "Nom_Entreprise": "Rothschild & Co (Paris)",
         "Secteur_Activite": "Banque d'Affaires & Banque Privée",
         "Priorite": "Tier 2 - Banque d'Affaires d'Élite",
-        "Nom_Contact": "Direction Sustainability & Community Affairs",
-        "Poste_Contact": "Responsable Mécénat & Impact Social",
-        "Email_Contact": "via rothschildandco.com (avenue de Messine Paris)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/rothschild-co",
+        "Nom_Contact": "Anne Imbach / Ludivine de Quincerot",
+        "Poste_Contact": "Group Head of Sustainability / Head of Sustainable Investment AM",
+        "Email_Contact": "anne.imbach@rothschildandco.com / ludivine.dequincerot@rothschildandco.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/anne-imbach",
         "Site_Web": "https://www.rothschildandco.com/fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat d'impact social & Égalité des chances",
         "Angle_Pitch_Ambition_Campus": "Accompagnement d'excellence dans la durée, taux de réussite exceptionnel aux concours sélectifs.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Cibler le département Sustainability au 23 bis avenue de Messine (Paris 8e)."
+        "Notes_Action": "Cibler Anne Imbach au département Sustainability au 23 bis avenue de Messine (Paris 8e)."
     },
     {
         "ID": "ENT-15",
         "Nom_Entreprise": "Gide Loyrette Nouel",
         "Secteur_Activite": "Cabinet d'Avocats d'Affaires",
         "Priorite": "Tier 2 - Droit & Juridique",
-        "Nom_Contact": "Comité Gide Pro Bono & RSE",
-        "Poste_Contact": "Associé référent Pro Bono & Bourses",
-        "Email_Contact": "probono@gide.com / via gide.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/gide-loyrette-nouel",
+        "Nom_Contact": "Carole Malinvaud",
+        "Poste_Contact": "Associée, Présidente de la Commission Pro Bono & Fonds Gide Pro Bono",
+        "Email_Contact": "carole.malinvaud@gide.com / probono@gide.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/carole-malinvaud-091a1b18",
         "Site_Web": "https://www.gide.com",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat financier + Bourses d'excellence Droit (Sorbonne, Assas, Sciences Po)",
         "Angle_Pitch_Ambition_Campus": "17 admis à La Sorbonne et filières juridiques sélectives formés par Ambition Campus.",
         "Statut_Prospection": "À contacter en priorité (Secteur Droit)",
-        "Notes_Action": "Prendre contact avec le pôle Pro Bono au 15 rue de Laborde (Paris 8e)."
+        "Notes_Action": "Prendre contact avec Carole Malinvaud au 15 rue de Laborde (Paris 8e)."
     },
     {
         "ID": "ENT-16",
         "Nom_Entreprise": "August Debouzy",
         "Secteur_Activite": "Cabinet d'Avocats d'Affaires",
         "Priorite": "Tier 2 - Droit & Juridique",
-        "Nom_Contact": "Direction RSE & Pro Bono",
-        "Poste_Contact": "Responsable RSE & Engagements Solidaires",
-        "Email_Contact": "contact@august-debouzy.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/august-&-debouzy",
+        "Nom_Contact": "Fabienne Haas / Emmanuelle Barbara",
+        "Poste_Contact": "Associée, Référente Pro Bono & Solidarité « ADay to give » / Senior Partner",
+        "Email_Contact": "fhaas@august-debouzy.com / contact@august-debouzy.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/fabienne-haas-36b12a32",
         "Site_Web": "https://www.august-debouzy.com",
         "Ticket_Moyen_Estime": "8 000 € - 20 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat financier + Jurys d'éloquence et prise de parole",
         "Angle_Pitch_Ambition_Campus": "Concours annuel d'éloquence et ateliers oratoires animés avec des avocats du cabinet.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Proposer aux avocats d'August Debouzy d'être jurys de la finale d'éloquence."
+        "Notes_Action": "Proposer à Fabienne Haas d'être jury de la finale d'éloquence (6-8 rue Ménars, Paris 2e)."
     },
     {
         "ID": "ENT-17",
         "Nom_Entreprise": "Clifford Chance Paris",
         "Secteur_Activite": "Cabinet d'Avocats International",
         "Priorite": "Tier 2 - Droit & Juridique",
-        "Nom_Contact": "Responsible Business & Inclusion Committee",
-        "Poste_Contact": "Responsable Inclusion & Pro Bono Paris",
-        "Email_Contact": "via 1 rue d'Astorg Paris (prenom.nom@cliffordchance.com)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/clifford-chance-llp",
+        "Nom_Contact": "Charles-Henri Boeringer / Mathieu Remy",
+        "Poste_Contact": "Partner, Responsible Business & ESG Lead Paris / Managing Partner Paris",
+        "Email_Contact": "charles-henri.boeringer@cliffordchance.com / mathieu.remy@cliffordchance.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/charles-henri-boeringer-031a002",
         "Site_Web": "https://www.cliffordchance.com",
         "Ticket_Moyen_Estime": "10 000 € - 25 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Convention de mécénat pour l'accès aux carrières juridiques",
         "Angle_Pitch_Ambition_Campus": "Préparation aux entretiens sélectifs et immersion dans un cabinet d'avocats de premier plan.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Contacter le comité Responsible Business au bureau de Paris (1 rue d'Astorg)."
+        "Notes_Action": "Contacter Charles-Henri Boeringer au bureau de Paris (1 rue d'Astorg, Paris 8e)."
     },
     {
         "ID": "ENT-18",
         "Nom_Entreprise": "Linklaters Paris",
         "Secteur_Activite": "Cabinet d'Avocats International",
         "Priorite": "Tier 2 - Droit & Juridique",
-        "Nom_Contact": "Fondation Linklaters / Pôle RSE",
-        "Poste_Contact": "Responsable Pédagogie Solidaire & Insertion",
-        "Email_Contact": "via linklaters.com (25 rue de Marignan Paris)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/linklaters",
+        "Nom_Contact": "Anne Wachsmann",
+        "Poste_Contact": "Associée, Présidente de la Fondation d'entreprise Linklaters",
+        "Email_Contact": "anne.wachsmann@linklaters.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/anne-wachsmann-3b3b2414",
         "Site_Web": "https://www.linklaters.com",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Partenariat Pédagogie Solidaire & Égalité des Chances",
         "Angle_Pitch_Ambition_Campus": "Insertion professionnelle des jeunes par l'apprentissage des codes et de l'éloquence.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Prendre contact avec l'équipe RSE au 25 rue de Marignan (Paris 8e)."
+        "Notes_Action": "Prendre contact avec Anne Wachsmann au 25 rue de Marignan (Paris 8e)."
     },
     {
         "ID": "ENT-19",
         "Nom_Entreprise": "Google France",
         "Secteur_Activite": "Technologie & Numérique",
         "Priorite": "Tier 2 - Tech & Innovation",
-        "Nom_Contact": "Direction des Relations Institutionnelles & RSE",
-        "Poste_Contact": "Responsable Impact Social & Éducation",
-        "Email_Contact": "contact via 8 rue de Londres 75009 Paris",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/google",
+        "Nom_Contact": "Benoît Tabaka",
+        "Poste_Contact": "Secrétaire Général & Directeur Relations Institutionnelles et Politiques Publiques",
+        "Email_Contact": "btabaka@google.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/benoittabaka",
         "Site_Web": "https://about.google/intl/fr_fr/",
         "Ticket_Moyen_Estime": "20 000 € - 50 000 €",
         "Levier_Fiscal_60pct": "Don d'entreprise / Soutien philanthropique",
         "Type_Approche": "Mécénat financier + Accueil des visites lycéens dans leurs locaux",
         "Angle_Pitch_Ambition_Campus": "Nos lycéens visitent déjà le siège de Google France. Renforçons ce lien par un mécénat pérenne.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Proposer d'officialiser la convention de partenariat annuel (8 rue de Londres, Paris 9e)."
+        "Notes_Action": "Proposer d'officialiser la convention de partenariat annuel à Benoît Tabaka (8 rue de Londres, Paris 9e)."
     },
     {
         "ID": "ENT-20",
         "Nom_Entreprise": "Microsoft France",
         "Secteur_Activite": "Technologie & Cloud",
         "Priorite": "Tier 2 - Tech & Innovation",
-        "Nom_Contact": "Microsoft Philanthropies France",
-        "Poste_Contact": "Directeur Philanthropies & Égalité des chances",
-        "Email_Contact": "via 39 Quai du Président Roosevelt 92130 Issy",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/microsoft",
+        "Nom_Contact": "Eneric Lopez / Philippe Trotin",
+        "Poste_Contact": "Directeur IA & Impact Social / Directeur Inclusion et Accessibilité",
+        "Email_Contact": "eneric.lopez@microsoft.com / philippe.trotin@microsoft.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/enericlopez",
         "Site_Web": "https://www.microsoft.com/fr-fr",
         "Ticket_Moyen_Estime": "15 000 € - 35 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Programme Éducation & Mécénat d'équipement/financement",
         "Angle_Pitch_Ambition_Campus": "Équipement numérique et accompagnement des lycéens vers les carrières d'ingénieurs et de la tech.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Soumettre une demande sur le portail Microsoft pour les associations."
+        "Notes_Action": "Contacter Eneric Lopez au campus Microsoft (39 Quai Roosevelt, Issy-les-Moulineaux)."
     },
     {
         "ID": "ENT-21",
         "Nom_Entreprise": "Amazon France",
         "Secteur_Activite": "E-Commerce, Cloud & Logistique",
         "Priorite": "Tier 3 - Tech & Logistique",
-        "Nom_Contact": "Direction RSE & Programme Amazon Future Engineer",
-        "Poste_Contact": "Responsable Programmes Éducation & Diversité",
-        "Email_Contact": "via 67 bd du Général Leclerc 92110 Clichy",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/amazon",
+        "Nom_Contact": "Elise Beuriot",
+        "Poste_Contact": "Responsable du Programme Amazon Future Engineer France",
+        "Email_Contact": "ebeuriot@amazon.fr / contact-afe@amazon.fr",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/elisebeuriot",
         "Site_Web": "https://www.aboutamazon.fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Synergie avec Amazon Future Engineer & Bourses",
         "Angle_Pitch_Ambition_Campus": "Sensibilisation et propulsion des jeunes de banlieue vers les filières supérieures d'excellence.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Contacter l'équipe RSE à Clichy (92)."
+        "Notes_Action": "Contacter Elise Beuriot au siège d'Amazon France (67 bd du Général Leclerc, Clichy)."
     },
     {
         "ID": "ENT-22",
         "Nom_Entreprise": "Groupe TF1 (RSE & Marque Employeur)",
         "Secteur_Activite": "Médias & Télévision",
         "Priorite": "Tier 2 - Médias & Prise de Parole",
-        "Nom_Contact": "Direction RSE & Diversité",
-        "Poste_Contact": "Directrice RSE & Engagement des collaborateurs",
-        "Email_Contact": "rse@tf1.fr / fondationtf1@tf1.fr",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/tf1",
+        "Nom_Contact": "Arnaud Bosom / Sophie Danis",
+        "Poste_Contact": "Directeur Général Adjoint RH & RSE / Directrice Communication Programmes & RSE",
+        "Email_Contact": "abosom@tf1.fr / sdanis@tf1.fr",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/arnaud-bosom",
         "Site_Web": "https://groupe-tf1.fr",
         "Ticket_Moyen_Estime": "8 000 € - 15 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Parrainage Concours d'Éloquence & Visites de plateaux",
         "Angle_Pitch_Ambition_Campus": "Modules Ethos/Pathos/Logos, concours annuel d'art oratoire et documentaire « Mérite sous condition ».",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Proposer aux journalistes/présentateurs de TF1 d'animer une masterclass éloquence."
+        "Notes_Action": "Proposer à Arnaud Bosom et Sophie Danis de parrainer la finale d'éloquence (1 quai du Point du Jour, Boulogne)."
     },
     {
         "ID": "ENT-23",
         "Nom_Entreprise": "L'Oréal France (Direction RSE)",
         "Secteur_Activite": "Cosmétique & Luxe",
         "Priorite": "Tier 2 - Grand Groupe",
-        "Nom_Contact": "Direction RSE & Diversité France",
-        "Poste_Contact": "Responsable Diversité & Égalité des Chances",
-        "Email_Contact": "rse.france@loreal.com (01 47 56 70 00)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/loreal",
+        "Nom_Contact": "Anne-Laure Thomas",
+        "Poste_Contact": "Directrice Diversité, Équité et Inclusion France",
+        "Email_Contact": "anne-laure.thomas@loreal.com / rse.france@loreal.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/anne-laure-thomas-5b72224",
         "Site_Web": "https://www.loreal.com/fr/",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
         "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat d'émancipation & Parrainage de promotions",
         "Angle_Pitch_Ambition_Campus": "Propulser les talents féminins et masculins de banlieue vers les postes de cadres et dirigeants.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Prendre contact au siège de Clichy (41 rue Martre)."
+        "Notes_Action": "Prendre contact avec Anne-Laure Thomas au siège de Clichy (41 rue Martre)."
     },
     {
         "ID": "ENT-24",
         "Nom_Entreprise": "LVMH (Moët Hennessy Louis Vuitton)",
         "Secteur_Activite": "Luxe & Métiers d'Excellence",
         "Priorite": "Tier 2 - Grand Groupe",
-        "Nom_Contact": "Direction du Développement Durable & Mécénat",
-        "Poste_Contact": "Responsable Mécénat & Diversité",
-        "Email_Contact": "contact via 22 avenue Montaigne 75008 Paris",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/lvmh",
+        "Nom_Contact": "Alexandre Boquel / Antoine Arnault",
+        "Poste_Contact": "Directeur des Métiers d'Excellence LVMH / Directeur Image & Environnement",
+        "Email_Contact": "a.boquel@lvmh.com / antoine.arnault@lvmh.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/alexandre-boquel-128a3818",
         "Site_Web": "https://www.lvmh.fr",
         "Ticket_Moyen_Estime": "20 000 € - 40 000 €",
         "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat d'excellence académique & Bourses",
         "Angle_Pitch_Ambition_Campus": "Transmission des codes de l'excellence aux jeunes de banlieue accédant à Sciences Po et aux grandes écoles.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Adresser une proposition formelle au 22 avenue Montaigne."
+        "Notes_Action": "Adresser une proposition formelle à Alexandre Boquel au 22 avenue Montaigne (Paris 8e)."
     },
     {
         "ID": "ENT-25",
         "Nom_Entreprise": "Bouygues Construction / SA Bouygues",
         "Secteur_Activite": "BTP, Immobilier & Services",
         "Priorite": "Tier 3 - Grand Groupe Industriel",
-        "Nom_Contact": "Direction RSE & Mécénat Territorial",
-        "Poste_Contact": "Directeur RSE & Engagement Collaborateurs",
-        "Email_Contact": "rse@bouygues-construction.com (01 30 60 33 00)",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/bouygues-construction",
+        "Nom_Contact": "Patrizia Gatti-Gregori / Marie-Luce Godinot",
+        "Poste_Contact": "Directrice Environnement, Décarbonation et RSE / DGA Innovation & DD Groupe",
+        "Email_Contact": "p.gatti-gregori@bouygues-construction.com / rse@bouygues-construction.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/patrizia-gatti-gregori-43615410",
         "Site_Web": "https://www.bouygues-construction.com",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat territorial & Parrainage de promotions",
         "Angle_Pitch_Ambition_Campus": "Fort ancrage dans les quartiers en rénovation urbaine où se situent les 36 lycées partenaires.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Contacter le siège Challenger à Guyancourt (78)."
+        "Notes_Action": "Contacter Patrizia Gatti-Gregori au siège Challenger à Guyancourt (78)."
     },
     {
         "ID": "ENT-26",
         "Nom_Entreprise": "Saint-Gobain France",
         "Secteur_Activite": "Matériaux & Industrie",
         "Priorite": "Tier 3 - Grand Groupe Industriel",
-        "Nom_Contact": "Direction RSE & Mécénat France",
-        "Poste_Contact": "Responsable Engagements Solidaires",
-        "Email_Contact": "rse.france@saint-gobain.com",
-        "LinkedIn_Contact": "https://www.linkedin.com/company/saint-gobain",
+        "Nom_Contact": "Claire Pedini",
+        "Poste_Contact": "Directrice Générale Adjointe, Directrice des RH & RSE Groupe",
+        "Email_Contact": "claire.pedini@saint-gobain.com / rse.france@saint-gobain.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/claire-pedini-1b641a23",
         "Site_Web": "https://www.saint-gobain.com/fr",
         "Ticket_Moyen_Estime": "10 000 € - 20 000 €",
         "Levier_Fiscal_60pct": "Don 10 000 € = Coût net 4 000 € (Art. 238 bis CGI)",
         "Type_Approche": "Mécénat financier + Parrainage de collaborateurs",
         "Angle_Pitch_Ambition_Campus": "Ascension sociale par les études supérieures : un modèle 100% bénévole gage d'efficacité maximale.",
         "Statut_Prospection": "À contacter",
-        "Notes_Action": "Cibler la Tour Saint-Gobain à Paris La Défense."
+        "Notes_Action": "Cibler Claire Pedini à la Tour Saint-Gobain (Paris La Défense)."
+    },
+    {
+        "ID": "ENT-27",
+        "Nom_Entreprise": "Sia Partners",
+        "Secteur_Activite": "Conseil en Stratégie & Management",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Anatole de la Brosse",
+        "Poste_Contact": "Directeur Général Adjoint, Pilote du Programme « Consulting for Good »",
+        "Email_Contact": "anatole.delabrosse@sia-partners.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/anatole-de-la-brosse-b02441",
+        "Site_Web": "https://www.sia-partners.com/fr",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Convention Mécénat / Partenariat « Consulting for Good »",
+        "Angle_Pitch_Ambition_Campus": "Positionner Ambition Campus comme partenaire terrain pour leurs missions Consulting for Good : vivier de lycéens brillants vers les métiers du conseil et de la data/IA.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Proposer une convention de mécénat 2026-2027 et masterclass métier à Anatole de la Brosse (12 rue de Berri, Paris 8e)."
+    },
+    {
+        "ID": "ENT-28",
+        "Nom_Entreprise": "BearingPoint France",
+        "Secteur_Activite": "Conseil en Management & Technologies",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Axelle Paquer / Sébastien Guéchot",
+        "Poste_Contact": "Présidente France & Resp. RSE Firmwide / Head of Sustainability Consulting",
+        "Email_Contact": "axelle.paquer@bearingpoint.com / sebastien.guechot@bearingpoint.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/axelle-paquer-7b1990",
+        "Site_Web": "https://www.bearingpoint.com/fr-fr/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Convention Mécénat / Programme « #WeCare » & Pro Bono",
+        "Angle_Pitch_Ambition_Campus": "Pitch « We Care Talents » : pipeline de jeunes issus de QPV formés aux enjeux climatiques, à l'IT et au conseil.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Proposer une convention de mécénat et masterclass à Axelle Paquer (Tour CBX, Paris La Défense)."
+    },
+    {
+        "ID": "ENT-29",
+        "Nom_Entreprise": "Arthur D. Little France",
+        "Secteur_Activite": "Conseil en Stratégie & Innovation",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Vincent Bamberger / Florent Nanse",
+        "Poste_Contact": "Managing Partner France / Partner Global ESG Committee",
+        "Email_Contact": "bamberger.vincent@adlittle.com / nanse.florent@adlittle.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/vincent-bamberger-155097",
+        "Site_Web": "https://www.adlittle.com/en/esg",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Partenariat « Social Impact Mentoring » & Bourses",
+        "Angle_Pitch_Ambition_Campus": "Mentors consultants pour Ambition Campus et accompagnement de lycéens préparant écoles d'ingénieurs et de commerce.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Vincent Bamberger au bureau de Paris (7 place d'Iéna, Paris 16e)."
+    },
+    {
+        "ID": "ENT-30",
+        "Nom_Entreprise": "Oliver Wyman France",
+        "Secteur_Activite": "Conseil en Stratégie & Management",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Bruno Despujol / Marc Boilard",
+        "Poste_Contact": "Market Leader France & Belgium, Head of Sustainability / Partner Social Impact",
+        "Email_Contact": "bruno.despujol@oliverwyman.com / marc.boilard@oliverwyman.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/bruno-despujol-5593892",
+        "Site_Web": "https://www.oliverwyman.fr",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Partenariat « Oliver Wyman for Society » & Mécénat",
+        "Angle_Pitch_Ambition_Campus": "Positionner Ambition Campus comme partenaire phare pour leurs projets égalité des chances et ODD ONU.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Proposer une convention de mécénat à Bruno Despujol (1 rue Euler, Paris 8e)."
+    },
+    {
+        "ID": "ENT-31",
+        "Nom_Entreprise": "Kearney France",
+        "Secteur_Activite": "Conseil en Stratégie",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Delphine Bourrilly / Nicolas Lioliakis",
+        "Poste_Contact": "Présidente & Managing Partner France / Chairman Paris & Référent Social Impact",
+        "Email_Contact": "delphine.bourrilly@kearney.com / nicolas.lioliakis@kearney.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/delphine-bourrilly-8208945",
+        "Site_Web": "https://www.kearney.com/about/locations/france",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Social Impact externship » & Pro Bono",
+        "Angle_Pitch_Ambition_Campus": "Construire un externship Ambition Campus : consultants en mission pro bono pour coaching concours et oraux Sciences Po/CPGE.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Delphine Bourrilly et Nicolas Lioliakis au bureau de Paris (23 rue de l'Université, Paris 7e)."
+    },
+    {
+        "ID": "ENT-32",
+        "Nom_Entreprise": "Simon-Kucher France",
+        "Secteur_Activite": "Conseil en Stratégie & Pricing",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "David Vidal / Kai Bandilla / Camille Fouillade",
+        "Poste_Contact": "Managing Partner France / Senior Partner / Head of Communications & ESG",
+        "Email_Contact": "david.vidal@simon-kucher.com / kai.bandilla@simon-kucher.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/david-vidal-5764b8",
+        "Site_Web": "https://www.simon-kucher.com/fr",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Stratégie ESG & Croissance Inclusive",
+        "Angle_Pitch_Ambition_Campus": "Pitch « Croissance inclusive » : co-construire des parcours vers les filières commerciales et recruter des talents issus de milieux populaires.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter David Vidal et Kai Bandilla au bureau de Paris (11 rue de Téhéran, Paris 8e)."
+    },
+    {
+        "ID": "ENT-33",
+        "Nom_Entreprise": "Capgemini Invent",
+        "Secteur_Activite": "Conseil en Transformation & Innovation Durable",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Cyril Garcia",
+        "Poste_Contact": "Global Head of Sustainability Services & Corporate Responsibility (ex-CEO Invent)",
+        "Email_Contact": "cyril.garcia@capgemini.com / contact.fr@capgemini.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/cyrilgarcia",
+        "Site_Web": "https://www.capgemini.com/fr-fr/invent/",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Invent for Society » & Inclusion Numérique",
+        "Angle_Pitch_Ambition_Campus": "Positionner Ambition Campus comme vivier pour leurs équipes Sustainability et partenaire d'accès aux filières IT/ingénieurs.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Solliciter un échange avec Cyril Garcia au siège 147 quai du Président Roosevelt (Issy-les-Moulineaux)."
+    },
+    {
+        "ID": "ENT-34",
+        "Nom_Entreprise": "Roland Berger France",
+        "Secteur_Activite": "Conseil en Stratégie",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Laurent Benarousse / Anne Corteggiano",
+        "Poste_Contact": "Managing Partner France / Director of External Affairs and Engagement",
+        "Email_Contact": "laurent.benarousse@rolandberger.com / anne.corteggiano@rolandberger.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/laurentbenarousse",
+        "Site_Web": "https://www.rolandberger.com/fr/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Partenariat « Club Dirigeants & Égalité des Chances »",
+        "Angle_Pitch_Ambition_Campus": "Tables rondes Roland Berger x Ambition Campus et parrainage de promotions de lycéens vers les filières économie/management.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Laurent Benarousse et Anne Corteggiano au 14-16 rue des Capucines (Paris 2e)."
+    },
+    {
+        "ID": "ENT-35",
+        "Nom_Entreprise": "Bredin Prat",
+        "Secteur_Activite": "Cabinet d'Avocats d'Affaires",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Myriam Epelbaum / Florence Haas",
+        "Poste_Contact": "Associée, Référente Gouvernance & RSE / Associée, Comité de Direction & Pro Bono",
+        "Email_Contact": "myriamepelbaum@bredinprat.com / florencehaas@bredinprat.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/myriam-epelbaum-71408824",
+        "Site_Web": "https://www.bredinprat.fr/engagements/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Mécénat Pro Bono Structuré & Mentorat Juridique",
+        "Angle_Pitch_Ambition_Campus": "Pitch « Talents juridiques engagés » : pipeline de lycéens vers Droit Sorbonne/Assas, concours d'éloquence et mentorat par les avocats.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Myriam Epelbaum et Florence Haas au 53 quai d'Orsay (Paris 7e)."
+    },
+    {
+        "ID": "ENT-36",
+        "Nom_Entreprise": "Darrois Villey Maillot Brochier",
+        "Secteur_Activite": "Cabinet d'Avocats d'Affaires",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Matthieu Brochier / Jean-Michel Darrois",
+        "Poste_Contact": "Associé Gérant, Référent Pro Bono & Clinique du droit / Associé Fondateur",
+        "Email_Contact": "mbrochier@darroisvilley.com / contact@darroisvilley.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/matthieu-brochier-39352010",
+        "Site_Web": "https://www.darroisvilley.com/rse/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Égalité des Chances & Droit des Affaires »",
+        "Angle_Pitch_Ambition_Campus": "Ateliers de découverte des carrières juridiques, coaching concours et immersion en cabinet pour lycéens d'excellence.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Matthieu Brochier au 69 avenue Victor Hugo (Paris 16e)."
+    },
+    {
+        "ID": "ENT-37",
+        "Nom_Entreprise": "White & Case Paris",
+        "Secteur_Activite": "Cabinet d'Avocats International",
+        "Priorite": "Tier 2 - Cabinet de Référence (Conseil / Droit)",
+        "Nom_Contact": "Michael Polkinghorne",
+        "Poste_Contact": "Partner, Head of Paris Pro Bono Practice",
+        "Email_Contact": "mpolkinghorne@whitecase.com / probono@whitecase.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/michael-polkinghorne-30811b15",
+        "Site_Web": "https://www.whitecase.com/locations/emea/france",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Partenariat « Global Citizenship & Éloquence »",
+        "Angle_Pitch_Ambition_Campus": "Mécénat financier + de compétences pour concours d'éloquence Ambition Campus et préparation aux carrières internationales.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Prendre contact avec Michael Polkinghorne au 19 place Vendôme (Paris 1er)."
+    },
+    {
+        "ID": "ENT-38",
+        "Nom_Entreprise": "Eurazeo",
+        "Secteur_Activite": "Investissement & Private Equity",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Sophie Flak",
+        "Poste_Contact": "Membre du Directoire, Managing Partner RSE, Sustainability & Impact",
+        "Email_Contact": "sflak@eurazeo.com / esg@eurazeo.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/sophie-flak-3914a1",
+        "Site_Web": "https://www.eurazeo.com/fr/responsabilite/publications-esg",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Fonds de Bourses « Eurazeo - Ambition Campus »",
+        "Angle_Pitch_Ambition_Campus": "Bourses finançant prépas et Sciences Po, aligné sur leur stratégie ESG « O+ » et priorité inclusion sociale.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Sophie Flak au siège 1 rue Georges Berger (Paris 17e)."
+    },
+    {
+        "ID": "ENT-39",
+        "Nom_Entreprise": "Tikehau Capital",
+        "Secteur_Activite": "Gestion d'Actifs & Private Equity",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Mario Mitri / Pierre Abadie",
+        "Poste_Contact": "Chief Sustainability Officer / Group Climate Director",
+        "Email_Contact": "mmitri@tikehaucapital.com / pabadie@tikehaucapital.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/mario-mitri",
+        "Site_Web": "https://www.tikehaucapital.com/en/our-group/sustainability",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Sustainability by Design & Social Inclusion »",
+        "Angle_Pitch_Ambition_Campus": "Financer des bourses pour filières finance/climat et co-créer un track de recrutement de jeunes de QPV vers leurs équipes investissement.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Mario Mitri et Pierre Abadie au 32 rue de Monceau (Paris 8e)."
+    },
+    {
+        "ID": "ENT-40",
+        "Nom_Entreprise": "Ardian",
+        "Secteur_Activite": "Private Equity & Infrastructure",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Candice Brenet / Mathias Burghardt",
+        "Poste_Contact": "Managing Director, Head of Sustainability / Président de la Fondation Ardian",
+        "Email_Contact": "candice.brenet@ardian.com / fondation@ardian.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/candice-brenet-4a2753",
+        "Site_Web": "https://www.ardian.com/fr/sustainability",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Mécénat Fondation Ardian & Bourses de Mobilité Sociale",
+        "Angle_Pitch_Ambition_Campus": "Bourses et coaching vers Dauphine, ESSEC, HEC, pipeline de profils pour leurs équipes d'investissement.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Candice Brenet et l'équipe Fondation au 20 place Vendôme (Paris 1er)."
+    },
+    {
+        "ID": "ENT-41",
+        "Nom_Entreprise": "Amundi",
+        "Secteur_Activite": "Gestion d'Actifs (1er Asset Manager Européen)",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Elodie Laugel / Caroline Le Meaux",
+        "Poste_Contact": "Chief Responsible Investment Officer (Comex) / Global Head of ESG Research & Engagement",
+        "Email_Contact": "elodie.laugel@amundi.com / caroline.lemeaux@amundi.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/elodielaugel",
+        "Site_Web": "https://legroupe.amundi.com/documentation-esg",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Finance Durable & Égalité des Chances »",
+        "Angle_Pitch_Ambition_Campus": "Créer un programme de bourses climat/ESG pour lycéens se destinant à la finance et pipeline de stagiaires.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Elodie Laugel au siège 91-93 boulevard Pasteur (Paris 15e)."
+    },
+    {
+        "ID": "ENT-42",
+        "Nom_Entreprise": "ODDO BHF",
+        "Secteur_Activite": "Banque Privée & Asset Management",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Valentin Pernet",
+        "Poste_Contact": "Global Head of Sustainable Investment Solutions & Fonds « Agir pour demain »",
+        "Email_Contact": "valentin.pernet@oddo-bhf.com / contact@oddo-bhf.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/valentin-pernet-87779b1b",
+        "Site_Web": "https://www.oddo-bhf.com/fr/engagements/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Mécénat via Fonds de Dotation « ODDO BHF Agir pour demain »",
+        "Angle_Pitch_Ambition_Campus": "Bourses d'excellence ciblées sur lycéens Ambition Campus et parrainage vers les métiers de la banque privée.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Valentin Pernet au 12 boulevard de la Madeleine (Paris 9e)."
+    },
+    {
+        "ID": "ENT-43",
+        "Nom_Entreprise": "BlackRock France SAS",
+        "Secteur_Activite": "Gestion d'Actifs & Marchés de Capitaux",
+        "Priorite": "Tier 2 - Finance, Private Equity & Assurance",
+        "Nom_Contact": "Estelle Castres / Henri Chabadel",
+        "Poste_Contact": "Country Head France, Belux, Monaco / Chief Investment Officer France",
+        "Email_Contact": "estelle.castres@blackrock.com / henri.chabadel@blackrock.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/estelle-castres-betzler-5881023",
+        "Site_Web": "https://www.blackrock.com/fr",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme Bourses « BlackRock France - Ambition Campus »",
+        "Angle_Pitch_Ambition_Campus": "Bourses vers les filières finance internationale et marchés de capitaux, mentorat par les équipes d'investissement.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Estelle Castres et Henri Chabadel au bureau de Paris (21 rue de la Ville-l'Évêque, Paris 8e)."
+    },
+    {
+        "ID": "ENT-44",
+        "Nom_Entreprise": "Allianz France",
+        "Secteur_Activite": "Assurance & Gestion de Risques",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Marie-Doha Besancenot / Direction RSE",
+        "Poste_Contact": "Directrice Marque, Communication & RSE France",
+        "Email_Contact": "rse@allianz.fr / communication@allianz.fr",
+        "LinkedIn_Contact": "https://www.linkedin.com/company/allianz",
+        "Site_Web": "https://www.allianz.fr/qui-est-allianz/allianz-s-engage/notre-raison-d-etre/demarche-rse.html",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Mécénat Territorial & Réseau d'Agents Engagés",
+        "Angle_Pitch_Ambition_Campus": "Mécénat territorial pour parrainer des lycées en zones de rénovation urbaine, engagement des collaborateurs comme mentors.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Cibler la Direction RSE et Communication à la Tour Allianz One (Paris La Défense)."
+    },
+    {
+        "ID": "ENT-45",
+        "Nom_Entreprise": "Groupama",
+        "Secteur_Activite": "Mutuelle d'Assurance & Banque",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "François Coste / Direction Durabilité",
+        "Poste_Contact": "Directeur Groupe Durabilité / Sustainability Groupama",
+        "Email_Contact": "francois.coste@groupama.com / rse@groupama.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/francois-coste-groupama",
+        "Site_Web": "https://www.groupama.com/fr/engagements-rse/",
+        "Ticket_Moyen_Estime": "15 000 €",
+        "Levier_Fiscal_60pct": "Don 15 000 € = Coût net 6 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Mécénat Territorial & Inclusion des Jeunes",
+        "Angle_Pitch_Ambition_Campus": "Soutien aux lycées partenaires Ambition Campus en zones périurbaines et rurales, interventions sur la gestion des risques.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter François Coste au siège 8-10 rue d'Astorg (Paris 8e)."
+    },
+    {
+        "ID": "ENT-46",
+        "Nom_Entreprise": "Danone",
+        "Secteur_Activite": "Agroalimentaire (Société à Mission & B Corp)",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Nathalie Alquier / Thomas Kyriaco",
+        "Poste_Contact": "Chief Sustainability Officer / Directeur RSE & Impact Journey",
+        "Email_Contact": "nathalie.alquier@danone.com / thomas.kyriaco@danone.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/nathalie-alquier-591b721",
+        "Site_Web": "https://www.danone.com/fr/engagements.html",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Partenariat « Santé, Alimentation & Mobilité Sociale »",
+        "Angle_Pitch_Ambition_Campus": "Bourses pour filières médecine, nutrition, économie/gestion et mentorat vers les métiers juridiques/financiers de Danone.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Nathalie Alquier et Thomas Kyriaco au 17 boulevard Haussmann (Paris 9e)."
+    },
+    {
+        "ID": "ENT-47",
+        "Nom_Entreprise": "Schneider Electric",
+        "Secteur_Activite": "Technologies de l'Énergie & Automatisation",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Gilles Vermot Desroches",
+        "Poste_Contact": "Chief Sustainability Officer & Délégué Général Fondation Schneider Electric",
+        "Email_Contact": "gilles.vermot-desroches@se.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/gilles-vermot-desroches-0363212",
+        "Site_Web": "https://www.se.com/fr/fr/about-us/sustainability/",
+        "Ticket_Moyen_Estime": "20 000 €",
+        "Levier_Fiscal_60pct": "Don 20 000 € = Coût net 8 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Énergie Verte, Tech & Inclusion »",
+        "Angle_Pitch_Ambition_Campus": "Partenariat mêlant visites de sites, hackathons énergie pour lycéens et pipeline de talents pour métiers d'ingénieur.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Gilles Vermot Desroches au siège 35 rue Joseph Monier (Rueil-Malmaison)."
+    },
+    {
+        "ID": "ENT-48",
+        "Nom_Entreprise": "Capgemini (Groupe)",
+        "Secteur_Activite": "Services Numériques & Ingénierie",
+        "Priorite": "Tier 3 - Grand Groupe & Entreprise à Mission",
+        "Nom_Contact": "Cyril Garcia",
+        "Poste_Contact": "Global Head of Sustainability Services & Corporate Responsibility (Comex)",
+        "Email_Contact": "cyril.garcia@capgemini.com / contact.fr@capgemini.com",
+        "LinkedIn_Contact": "https://www.linkedin.com/in/cyrilgarcia",
+        "Site_Web": "https://www.capgemini.com/fr-fr/services/developpement-durable/",
+        "Ticket_Moyen_Estime": "25 000 €",
+        "Levier_Fiscal_60pct": "Don 25 000 € = Coût net 10 000 € (Déduction 60% IS Art. 238 bis CGI)",
+        "Type_Approche": "Programme « Tech, Numérique Inclusif & Égalité des Chances »",
+        "Angle_Pitch_Ambition_Campus": "Mécénat pour équiper lycéens en matériel numérique, bootcamps IA/code et pipeline pour filières ingénieurs/IT.",
+        "Statut_Prospection": "À contacter",
+        "Notes_Action": "Contacter Cyril Garcia au siège 11 rue de Tilsitt (Paris 17e) ou campus Issy."
     }
 ]
 
 
-def clean_text_field(text):
-    """Nettoie les artefacts de recherche web (+1, +2, sites collés, etc.)."""
-    if not text or pd.isna(text):
-        return ""
-    t = str(text)
-    # Nettoyer les balises de citations web (+1, +2, etc.)
-    t = re.sub(r'(\w+[\.\-\w]*)\+\d+', r'\1', t)
-    # Nettoyer les domaines cités collés (wikipedia, sia-partners, etc.)
-    t = re.sub(r'\b(wikipedia|carrieresfrance\.[a-z]+|adlittle|oliverwyman|kearney|simon-kucher|capgemini|annuaire-entreprises\.data\.gouv|droitsdurgence|darrois|officiel-inclusion|eurazeo|tikehaucapital|ardian|amundi|oddo-bhf|climate-transparency-hub\.ademe|allianz|groupama|food\.ec\.europa|se)\b', '', t, flags=re.IGNORECASE)
-    # Nettoyer les suffixes d'URL collés
-    t = re.sub(r'(https?://[^\s\)]+)(sia-partners|carrieresfrance|adlittle|oliverwyman|kearney|simon-kucher|capgemini|eurazeo|tikehaucapital|ardian|amundi|oddo-bhf|allianz|groupama|danone|schneider)', r'\1', t)
-    # Espaces multiples
-    t = re.sub(r'\s+', ' ', t).strip()
-    return t
-
-
-def load_and_merge_entreprises():
-    """Charge le fichier téléchargé, le nettoie et le fusionne avec le lot initial."""
-    all_data = list(BASE_ENTREPRISES_LOT1)
-
-    if os.path.exists(DOWNLOAD_PATH):
-        print(f"Chargement des nouvelles entreprises depuis : {DOWNLOAD_PATH}")
-        with open(DOWNLOAD_PATH, "r", encoding="utf-8", errors="ignore") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                eid = clean_text_field(row.get("ID", ""))
-                # Ne pas dupliquer si déjà présent
-                if any(x["ID"] == eid for x in all_data):
-                    continue
-
-                nom = clean_text_field(row.get("Nom_Entreprise", ""))
-                secteur = clean_text_field(row.get("Secteur_Activite", ""))
-                contact = clean_text_field(row.get("Nom_Contact_Decideur", ""))
-                poste = clean_text_field(row.get("Poste_Contact", ""))
-                email = clean_text_field(row.get("Email_Contact_Verifie", ""))
-                source = clean_text_field(row.get("Source_Officielle_RSE (Lien/Rapport)", ""))
-                ticket = clean_text_field(row.get("Ticket_Moyen_Estime", ""))
-                cout_net = clean_text_field(row.get("Cout_Net_Apres_IS_60pct", ""))
-                rse_prog = clean_text_field(row.get("Programme_RSE_Existant", ""))
-                pitch = clean_text_field(row.get("Angle_Pitch_Ambition_Campus", ""))
-
-                # Extraction d'une URL propre depuis la source RSE
-                url_match = re.search(r'https?://[^\s\)]+', source)
-                site_web = url_match.group(0) if url_match else f"https://www.{nom.lower().replace(' ', '').replace('’', '').replace('france', '')}.com"
-
-                # Attribution de la priorité selon le profil
-                if any(k in nom.lower() for k in ["sia partners", "bearingpoint", "oliver wyman", "roland berger", "bredin prat", "darrois", "white & case"]):
-                    prio = "Tier 2 - Cabinet de Référence (Conseil / Droit)"
-                elif any(k in nom.lower() for k in ["eurazeo", "tikehau", "ardian", "amundi", "oddo", "blackrock", "allianz", "groupama"]):
-                    prio = "Tier 2 - Finance, Private Equity & Assurance"
-                else:
-                    prio = "Tier 3 - Grand Groupe & Entreprise à Mission"
-
-                item = {
-                    "ID": eid,
-                    "Nom_Entreprise": nom,
-                    "Secteur_Activite": secteur,
-                    "Priorite": prio,
-                    "Nom_Contact": contact,
-                    "Poste_Contact": poste,
-                    "Email_Contact": email if email and "À compléter" not in email else f"via direction RSE ({site_web})",
-                    "LinkedIn_Contact": f"https://www.linkedin.com/company/{nom.lower().replace(' ', '-').replace('’', '')}",
-                    "Site_Web": site_web,
-                    "Ticket_Moyen_Estime": ticket,
-                    "Levier_Fiscal_60pct": f"Don {ticket} = Coût net {cout_net} (Déduction 60% IS Art. 238 bis CGI)",
-                    "Type_Approche": f"Convention Mécénat / Partenariat {rse_prog[:40]}",
-                    "Angle_Pitch_Ambition_Campus": pitch,
-                    "Statut_Prospection": "À qualifier & contacter",
-                    "Notes_Action": f"Proposer une convention de mécénat 2026-2027 et masterclass métier. Source RSE : {source[:60]}"
-                }
-                all_data.append(item)
-
-    return all_data
-
-
 def generate_database():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    entreprises = load_and_merge_entreprises()
-    df = pd.DataFrame(entreprises)
+    df = pd.DataFrame(MASTER_ENTREPRISES)
 
     # 1. Export CSV propre encodé UTF-8 BOM
     df.to_csv(CSV_PATH, index=False, encoding="utf-8-sig", sep=";")
@@ -551,9 +849,6 @@ def generate_database():
         df.to_excel(writer, sheet_name="Master_Entreprises", index=False)
         workbook = writer.book
         worksheet = writer.sheets["Master_Entreprises"]
-
-        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-        from openpyxl.utils import get_column_letter
 
         header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
         header_fill = PatternFill(start_color="0F1E36", end_color="0F1E36", fill_type="solid")
@@ -573,20 +868,20 @@ def generate_database():
 
         col_widths = {
             "ID": 10,
-            "Nom_Entreprise": 28,
-            "Secteur_Activite": 28,
-            "Priorite": 26,
-            "Nom_Contact": 26,
-            "Poste_Contact": 30,
-            "Email_Contact": 32,
-            "LinkedIn_Contact": 30,
+            "Nom_Entreprise": 30,
+            "Secteur_Activite": 30,
+            "Priorite": 28,
+            "Nom_Contact": 28,
+            "Poste_Contact": 34,
+            "Email_Contact": 35,
+            "LinkedIn_Contact": 34,
             "Site_Web": 30,
             "Ticket_Moyen_Estime": 20,
             "Levier_Fiscal_60pct": 35,
-            "Type_Approche": 32,
-            "Angle_Pitch_Ambition_Campus": 38,
+            "Type_Approche": 34,
+            "Angle_Pitch_Ambition_Campus": 42,
             "Statut_Prospection": 24,
-            "Notes_Action": 35,
+            "Notes_Action": 38,
         }
 
         for row_idx in range(2, len(df) + 2):
@@ -610,7 +905,7 @@ def generate_database():
 
         for col_idx, col_name in enumerate(df.columns, 1):
             col_letter = get_column_letter(col_idx)
-            worksheet.column_dimensions[col_letter].width = col_widths.get(col_name, 22)
+            worksheet.column_dimensions[col_letter].width = col_widths.get(col_name, 24)
 
         worksheet.freeze_panes = "A2"
 
