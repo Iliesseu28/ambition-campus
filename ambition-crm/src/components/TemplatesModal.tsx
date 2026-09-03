@@ -7,7 +7,7 @@ interface TemplatesModalProps {
 
 export const TemplatesModal: React.FC<TemplatesModalProps> = ({ onClose }) => {
   const [activeChannel, setActiveChannel] = useState<'email' | 'linkedin'>('email');
-  const [activeAngle, setActiveAngle] = useState<'partenariat' | 'preuve_sociale' | 'fondation'>('partenariat');
+  const [activeAngle, setActiveAngle] = useState<'generique' | 'partenariat' | 'preuve_sociale' | 'fondation'>('generique');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleCopy = (text: string, id: string) => {
@@ -17,8 +17,36 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({ onClose }) => {
   };
 
   const emailTemplates = {
+    generique: {
+      title: "Message générique : Prise de contact à froid (Recommandé)",
+      objet: "Proposition de partenariat 2026-2027 avec Ambition Campus",
+      objetAlt: "[Nom Entreprise] × Ambition Campus : 15 minutes pour un partenariat 2026-2027",
+      body: `Bonjour [Prénom] [Nom],
+
+Je vous contacte au nom d'Ambition Campus pour vous proposer un temps d'échange sur la mise en place d'un partenariat pour l'année 2026-2027.
+
+Notre association mobilise déjà des partenaires de référence comme PwC, Deloitte, EY ou la Banque de France, dont les collaborateurs s'engagent à nos côtés lors de nos sessions d'oraux blancs et d'ateliers d'éloquence.
+
+Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
+
+Nous aimerions beaucoup associer [Nom Entreprise] à cette dynamique pour :
+1. Ouvrir vos métiers à des lycéens motivés.
+2. Permettre à vos collaborateurs de s'impliquer dans une action concrète et valorisante.
+3. Construire une convention de mécénat sur-mesure pour votre structure.
+
+Notre plaquette de présentation est jointe à ce message pour vous donner une vision d'ensemble.
+
+Auriez-vous 15 minutes à nous accorder ces prochains jours pour que nous puissions échanger ensemble à ce sujet ?
+
+Bien cordialement,
+
+L'équipe Ambition Campus
+Pôle Partenariats & Financements
+ambitioncampus.finance@gmail.com | 06 98 99 62 00
+https://ambitioncampus.com`
+    },
     partenariat: {
-      title: "Variante 1 : Prise de contact Partenariat & Synergie Métier (Recommandé)",
+      title: "Variante 1 : Prise de contact Partenariat & Synergie Métier",
       objet: "Prise de contact / Proposition de partenariat mécénat avec Ambition Campus",
       objetAlt: "[Partenariat 2026] Échanger avec Ambition Campus & [Nom Entreprise]",
       body: `Bonjour [Prénom] [Nom],
@@ -100,6 +128,19 @@ https://ambitioncampus.com`
   };
 
   const linkedinTemplates = {
+    generique: {
+      title: "Message générique à froid (Message direct / InMail)",
+      body: `Bonjour [Prénom],
+
+Je vous contacte au nom d'Ambition Campus pour vous proposer un temps d'échange sur un partenariat 2026-2027 entre [Nom Entreprise] et notre association.
+
+PwC, Deloitte, EY ou la Banque de France mobilisent déjà leurs collaborateurs à nos côtés (jurys d'oraux blancs, ateliers d'éloquence) pour accompagner chaque année plus de 500 lycéens de l'éducation prioritaire vers l'enseignement supérieur.
+
+Auriez-vous 15 minutes ces prochains jours pour en discuter ?
+
+Très belle journée,
+L'équipe Ambition Campus`
+    },
     partenariat: {
       title: "Message direct / InMail (Chaleureux & Professionnel)",
       body: `Bonjour [Prénom],
@@ -169,7 +210,7 @@ L'équipe Ambition Campus`
               }`}
             >
               <Mail className="w-4 h-4" />
-              <span>Modèles Emails de Prospection (3 Variantes)</span>
+              <span>Modèles Emails de Prospection (4 Variantes)</span>
             </button>
 
             <button
@@ -189,6 +230,16 @@ L'équipe Ambition Campus`
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-500 text-[11px]">Angle d'approche :</span>
             <button
+              onClick={() => setActiveAngle('generique')}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer border ${
+                activeAngle === 'generique'
+                  ? 'bg-blue-50 text-blue-700 border-blue-300'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              Message générique à froid (Recommandé)
+            </button>
+            <button
               onClick={() => setActiveAngle('partenariat')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer border ${
                 activeAngle === 'partenariat'
@@ -196,7 +247,7 @@ L'équipe Ambition Campus`
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              1. Partenariat & Synergie (Recommandé)
+              1. Partenariat & Synergie
             </button>
             <button
               onClick={() => setActiveAngle('preuve_sociale')}
@@ -307,7 +358,7 @@ L'équipe Ambition Campus`
               <span>Protocole d'envoi & bonnes pratiques pour l'équipe</span>
             </h4>
             <ul className="list-disc list-inside text-blue-950 text-[11px] space-y-1">
-              <li><b>J0 (Prise de contact) :</b> Envoyer l'email de prise de contact avec la plaquette PDF Ambition Campus en pièce jointe et passer le statut du contact à <code>Contacté (J0)</code>.</li>
+              <li><b>J0 (Prise de contact) :</b> Envoyer le message générique de prise de contact à froid avec la plaquette PDF Ambition Campus en pièce jointe et passer le statut du contact à <code>Contacté (J0)</code>.</li>
               <li><b>J+7 (Relance 1) :</b> Si pas de réponse sous 7 jours, envoyer une relance courte ou une approche LinkedIn personnalisée.</li>
               <li><b>J+15 (Relance 2) :</b> Dernière relance avec proposition d'invitation jury ou d'échange téléphonique de 10-15 min.</li>
               <li><b>Mise à jour :</b> Toujours consigner la date et le canal via le bouton <b>« Relancer »</b> de la ligne correspondante.</li>

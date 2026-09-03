@@ -32,7 +32,31 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
   );
 
   const handleGeneratePitch = () => {
-    const generated = `Bonjour ${contact.nom},\n\nJe me permets de prendre contact avec vous aujourd'hui dans l'optique d'étudier la mise en place d'un partenariat entre ${entityName} et notre association Ambition Campus.\n\nDepuis 17 ans, notre association d'intérêt général (100 % bénévole) accompagne chaque année plus de 500 lycéens issus de 36 lycées REP pour les aider à surmonter l'autocensure et intégrer les filières d'excellence (Sciences Po Paris, CPGE, La Sorbonne).\n\n${pitchAngle ? `Concernant ${entityName} : ${pitchAngle}\n\n` : ''}Seriez-vous disponible pour un court échange téléphonique ou visio de 15 minutes la semaine prochaine afin que nous puissions faire connaissance et en discuter ?\n\nBien cordialement,\nL'équipe Ambition Campus\nPôle Partenariats & Financements\nambitioncampus@gmail.com | 06 98 99 62 00`;
+    const generated = `Bonjour ${contact.nom},
+
+Je vous contacte au nom d'Ambition Campus pour vous proposer un temps d'échange sur la mise en place d'un partenariat entre ${entityName} et notre association pour l'année 2026-2027.
+
+Notre association mobilise déjà des partenaires de référence comme PwC, Deloitte, EY ou la Banque de France, dont les collaborateurs s'engagent à nos côtés lors de nos sessions d'oraux blancs et d'ateliers d'éloquence.
+
+Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
+
+${pitchAngle ? `Concernant ${entityName} : ${pitchAngle}
+
+` : ''}Nous aimerions beaucoup associer ${entityName} à cette dynamique pour :
+1. Ouvrir vos métiers à des lycéens motivés.
+2. Permettre à vos collaborateurs de s'impliquer dans une action concrète et valorisante.
+3. Construire une convention de mécénat sur-mesure pour votre structure.
+
+Notre plaquette de présentation est jointe à ce message pour vous donner une vision d'ensemble.
+
+Auriez-vous 15 minutes à nous accorder ces prochains jours pour que nous puissions échanger ensemble à ce sujet ?
+
+Bien cordialement,
+
+L'équipe Ambition Campus
+Pôle Partenariats & Financements
+ambitioncampus.finance@gmail.com | 06 98 99 62 00
+https://ambitioncampus.com`;
     setMessage(generated);
   };
 
