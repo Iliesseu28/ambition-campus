@@ -20,3 +20,6 @@ __pycache__/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Cache brut des recherches OSINT (Firecrawl / Perplexity)
+prospection/entreprises/verification/raw/

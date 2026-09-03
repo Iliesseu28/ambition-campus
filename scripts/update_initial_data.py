@@ -78,6 +78,7 @@ def update_crm_initial_data():
         contacts_names = [c.strip() for c in raw_contact.split(" / ")]
         contacts_postes = [p.strip() for p in raw_poste.split(" / ")]
         contacts_emails = [e.strip() for e in raw_email.split(" / ")]
+        contacts_linkedin = [l.strip() for l in raw_linkedin.split(" / ")]
 
         for i, c_name in enumerate(contacts_names):
             c_poste = contacts_postes[i] if i < len(contacts_postes) else (contacts_postes[0] if contacts_postes else "Direction RSE & Mécénat")
@@ -92,7 +93,7 @@ def update_crm_initial_data():
                 "poste": c_poste,
                 "email": c_email,
                 "telephone": "",
-                "linkedin": raw_linkedin,
+                "linkedin": contacts_linkedin[i] if i < len(contacts_linkedin) else "",
                 "statut": "À contacter",
                 "notes": f"Contact qualifié OSINT pour {name}",
                 "dernier_contact": None,
