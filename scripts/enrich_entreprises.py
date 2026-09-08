@@ -245,7 +245,7 @@ MASTER_ENTREPRISES = [
         "Priorite": "Tier 2 - Banque d'Affaires d'Élite",
         "Nom_Contact": "Anne Imbach / Ludivine de Quincerot",
         "Poste_Contact": "Group Head of Sustainability / Head of Sustainable Investment AM",
-        "Email_Contact": "anne.imbach@rothschildandco.com / ludivine.dequincerot@rothschildandco.com",
+        "Email_Contact": "anne.imbach@rothschildandco.com / ludivine.quincerot@rothschildandco.com",
         "LinkedIn_Contact": "https://www.linkedin.com/in/anne-imbach",
         "Site_Web": "https://www.rothschildandco.com/fr",
         "Ticket_Moyen_Estime": "15 000 € - 30 000 €",
