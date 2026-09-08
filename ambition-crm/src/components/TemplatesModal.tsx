@@ -27,7 +27,7 @@ Je vous contacte au nom d'Ambition Campus pour vous proposer un temps d'échange
 
 Notre association mobilise déjà des partenaires de référence comme PwC, Deloitte, EY ou la Banque de France, dont les collaborateurs s'engagent à nos côtés lors de nos sessions d'oraux blancs et d'ateliers d'éloquence.
 
-Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
+Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (Cette année c'est plus de 21 élèves admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
 
 Nous aimerions beaucoup associer [Nom Entreprise] à cette dynamique pour :
 1. Ouvrir vos métiers à des lycéens motivés.
@@ -82,7 +82,7 @@ Je vous contacte au nom d'Ambition Campus avec le souhait d'échanger avec vous 
 
 Notre association mobilise déjà des partenaires de référence comme PwC, Deloitte, EY ou la Banque de France, dont les collaborateurs s'engagent à nos côtés lors de nos sessions d'oraux blancs et d'ateliers d'éloquence.
 
-Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (21 admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
+Chaque année, nous accompagnons bénévolement plus de 500 lycéens issus de l'éducation prioritaire vers la réussite dans l'enseignement supérieur (Cette année c'est plus de 21 élèves admis à Sciences Po Paris, 17 à La Sorbonne, 13 en classes prépas en 2026).
 
 Nous aimerions beaucoup associer [Nom Entreprise] à cette dynamique pour :
 1. Ouvrir vos métiers à des lycéens méritants et motivés.
