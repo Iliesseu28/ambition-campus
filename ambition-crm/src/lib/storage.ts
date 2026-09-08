@@ -114,3 +114,41 @@ export function resetToDefault(): CRMData {
   saveData(migre);
   return migre;
 }
+
+/**
+ * Fusionne les données lues sur Supabase avec l'état local : Supabase fait foi
+ * pour les 4 tables partagées, le poste garde ce qui n'y est pas stocké
+ * (colonnes personnalisées et leurs valeurs, retours du site).
+ */
+export function fusionnerDonneesDistantes(
+  local: CRMData,
+  distant: {
+    entreprises?: Entreprise[];
+    appels_projets?: AppelProjet[];
+    contacts?: Contact[];
+    relances?: Relance[];
+  }
+): CRMData {
+  const perso = <T extends { id: string; custom_values?: Record<string, string> }>(anciens: T[]) =>
+    new Map(anciens.filter((x) => x.custom_values).map((x) => [x.id, x.custom_values!]));
+
+  const cvEnt = perso(local.entreprises || []);
+  const cvAap = perso(local.appels_projets || []);
+  const cvCnt = perso(local.contacts || []);
+
+  const fusionne: CRMData = {
+    ...local,
+    entreprises: (distant.entreprises || local.entreprises).map((e) =>
+      cvEnt.has(e.id) ? { ...e, custom_values: cvEnt.get(e.id) } : e
+    ),
+    appels_projets: (distant.appels_projets || local.appels_projets).map((a) =>
+      cvAap.has(a.id) ? { ...a, custom_values: cvAap.get(a.id) } : a
+    ),
+    contacts: (distant.contacts || local.contacts).map((c) =>
+      cvCnt.has(c.id) ? { ...c, custom_values: cvCnt.get(c.id) } : c
+    ),
+    relances: distant.relances || local.relances,
+  };
+
+  return migrerStatuts(fusionne);
+}
