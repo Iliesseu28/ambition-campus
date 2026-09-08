@@ -26,6 +26,10 @@ export function App() {
   const [saveSuccessMessage, setSaveSuccessMessage] = useState(false);
   const [syncStatus, setSyncStatus] = useState<{ message: string; isError: boolean } | null>(null);
   const [chargementDistant, setChargementDistant] = useState(true);
+  // Tant que la base n'a pas ete lue, l'app est en lecture seule vis-a-vis de Supabase :
+  // un poste qui n'a pas pu lire ne doit jamais pouvoir ecraser le travail des autres.
+  const [lectureDistanteOk, setLectureDistanteOk] = useState(false);
+  const lectureDistanteOkRef = useRef(false);
 
   const debounceTimerRef = useRef<any | null>(null);
   // Bloque l'envoi vers Supabase tant que la lecture initiale n'a pas eu lieu :
@@ -57,6 +61,8 @@ export function App() {
       const distant = await chargerDepuisSupabase();
       if (annule) return;
       if (distant.ok) {
+        lectureDistanteOkRef.current = true;
+        setLectureDistanteOk(true);
         ignorerProchainEnvoiRef.current = true;
         setData((prev) => {
           const fusion = fusionnerDonneesDistantes(prev, distant);
@@ -81,6 +87,12 @@ export function App() {
     if (ignorerProchainEnvoiRef.current) {
       ignorerProchainEnvoiRef.current = false;
       setAutoSyncStatus('synced');
+      return;
+    }
+
+    if (!lectureDistanteOkRef.current) {
+      // Lecture Supabase jamais aboutie : on enregistre en local, on n'envoie rien.
+      setAutoSyncStatus('error');
       return;
     }
 
@@ -274,6 +286,13 @@ export function App() {
   };
 
   const handleManualSync = async () => {
+    if (!lectureDistanteOkRef.current) {
+      setSyncStatus({
+        message: "Envoi bloqué : les données de Supabase n'ont pas pu être lues. Rechargez la page — envoyer maintenant écraserait la base avec un cache périmé.",
+        isError: true,
+      });
+      return;
+    }
     setIsSyncing(true);
     setSyncStatus(null);
     saveData(data);
@@ -323,9 +342,13 @@ export function App() {
             <span className="flex items-center gap-1.5 text-emerald-600 font-medium">
               <Cloud className="w-3.5 h-3.5" /> À jour avec Supabase (rechargé à l'ouverture, enregistré en direct)
             </span>
+          ) : !lectureDistanteOk ? (
+            <span className="flex items-center gap-1.5 text-rose-700 font-medium">
+              Lecture Supabase impossible · Modifications gardées en local et NON envoyées · rechargez la page
+            </span>
           ) : (
             <span className="flex items-center gap-1.5 text-amber-700 font-medium">
-              Mode local actif · Cliquez sur Synchroniser Supabase pour forcer l'envoi
+              Envoi vers Supabase en échec · réessayez avec Synchroniser Supabase
             </span>
           )}
         </div>

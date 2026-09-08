@@ -2,7 +2,9 @@ import { Entreprise, AppelProjet, Contact, Relance, CustomField, Feedback } from
 import initialData from '../initialData.json';
 import { migrerStatut } from './statuts';
 
-const STORAGE_KEY = 'ambition_campus_crm_data_v3';
+// v4 : repart d'un cache vierge. Les postes qui trainaient un localStorage v3
+// perime (statuts des vagues 2 et 3 absents) ne peuvent plus le reafficher.
+const STORAGE_KEY = 'ambition_campus_crm_data_v4';
 
 export interface CRMData {
   entreprises: Entreprise[];
