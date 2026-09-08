@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import type { AppelProjet, Contact, Relance, CustomField } from '../types';
+import {
+  STATUTS_CONTACT,
+  getStatutBadgeStyle,
+  migrerStatut,
+  aujourdhui,
+  formatDateStatut,
+} from '../lib/statuts';
 import { 
   Search, 
   Plus, 
@@ -17,7 +24,8 @@ import {
   FileText,
   User,
   Activity,
-  DollarSign
+  DollarSign,
+  CalendarClock
 } from 'lucide-react';
 
 interface AppelsProjetsTableProps {
@@ -29,7 +37,7 @@ interface AppelsProjetsTableProps {
   onOpenAddContact: (aap: AppelProjet) => void;
   onOpenAddOrganisation: () => void;
   onOpenAddColumn: () => void;
-  onUpdateContactStatut: (contactId: string, statut: string) => void;
+  onUpdateContactStatut: (contactId: string, statut: string, dateStatut?: string) => void;
   onUpdateAAPStatut: (aapId: string, statut: string) => void;
   onCellEdit: (type: 'aap' | 'contact', id: string, field: string, value: string) => void;
 }
@@ -59,6 +67,8 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
   } | null>(null);
 
   const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>({
+    statut_contact: true,
+    date_statut: true,
     organisme: true,
     parent: true,
     thematiques: true,
@@ -68,7 +78,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
     contact_email: true,
     contact_phone: true,
     statut_dossier: true,
-    statut_contact: true,
     ticket: true,
     lien_depot: true,
     relance_action: true,
@@ -125,7 +134,7 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
     return matchSearch && matchPriorite && matchStatut;
   });
 
-  const getStatutBadgeStyle = (statut: string) => {
+  const getDossierBadgeStyle = (statut: string) => {
     if (statut.includes('Lauréat') || statut.includes('Accord') || statut.includes('Intéressé')) {
       return 'bg-emerald-100 text-emerald-800 border-emerald-300';
     }
@@ -182,6 +191,8 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                   Afficher / Masquer Colonnes
                 </div>
                 {Object.entries({
+                  statut_contact: 'Statut du contact (colonne 1)',
+                  date_statut: 'Date du statut (colonne 2)',
                   organisme: 'Fondation & Organisme',
                   parent: 'Groupe Parent',
                   thematiques: 'Thématiques clés',
@@ -191,7 +202,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                   contact_email: 'Email direct',
                   contact_phone: 'Téléphone',
                   statut_dossier: 'Statut du dossier AAP',
-                  statut_contact: 'Statut du contact',
                   ticket: 'Ticket Visé',
                   lien_depot: 'Guichet de dépôt',
                   relance_action: 'Bouton Relance / Actions',
@@ -266,6 +276,24 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                 #
               </th>
 
+              {visibleCols.statut_contact && (
+                <th className="w-44 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
+                  <div className="flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Statut</span>
+                  </div>
+                </th>
+              )}
+
+              {visibleCols.date_statut && (
+                <th className="w-32 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarClock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Date du statut</span>
+                  </div>
+                </th>
+              )}
+
               {visibleCols.organisme && (
                 <th className="w-56 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
                   <div className="flex items-center gap-1.5">
@@ -335,12 +363,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                 </th>
               )}
 
-              {visibleCols.statut_contact && (
-                <th className="w-36 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
-                  <span>Statut Contact</span>
-                </th>
-              )}
-
               {visibleCols.ticket && (
                 <th className="w-36 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
                   <div className="flex items-center gap-1.5">
@@ -381,6 +403,11 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
             ) : (
               filteredAAPs.map((aap, idx) => {
                 const aapContacts = contacts.filter((c) => c.target_id === aap.id);
+                const dateStatutAap = aapContacts
+                  .map((c) => c.dernier_contact)
+                  .filter(Boolean)
+                  .sort()
+                  .pop();
                 const isExpanded = expandedAAPs[aap.id] ?? true;
 
                 return (
@@ -403,6 +430,18 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                           <span>{idx + 1}</span>
                         </div>
                       </td>
+
+                      {visibleCols.statut_contact && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-400 text-[11px]">
+                          {aapContacts.length} contact{aapContacts.length > 1 ? 's' : ''}
+                        </td>
+                      )}
+
+                      {visibleCols.date_statut && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[11px] font-medium">
+                          {formatDateStatut(dateStatutAap)}
+                        </td>
+                      )}
 
                       {/* Organisme Editable */}
                       {visibleCols.organisme && (
@@ -523,7 +562,7 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                           <select
                             value={aap.statut_dossier}
                             onChange={(e) => onUpdateAAPStatut(aap.id, e.target.value)}
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(aap.statut_dossier)}`}
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getDossierBadgeStyle(aap.statut_dossier)}`}
                           >
                             <option value="À préparer">À préparer</option>
                             <option value="En cours de rédaction">En rédaction</option>
@@ -533,10 +572,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                             <option value="Refusé">Refusé</option>
                           </select>
                         </td>
-                      )}
-
-                      {visibleCols.statut_contact && (
-                        <td className="py-2 px-3 border-r border-slate-200 text-slate-400">-</td>
                       )}
 
                       {/* Ticket Visé Editable */}
@@ -626,6 +661,27 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                         <td className="py-1.5 px-2 text-center border-r border-slate-200 text-slate-400 font-mono text-[10px]">
                           {idx + 1}.{cIdx + 1}
                         </td>
+
+                        {visibleCols.statut_contact && (
+                          <td className="py-1.5 px-3 border-r border-slate-200">
+                            <select
+                              value={migrerStatut(contact.statut)}
+                              onChange={(e) => onUpdateContactStatut(contact.id, e.target.value, aujourdhui())}
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(contact.statut)}`}
+                              title="Changer le statut horodate la colonne « Date du statut » à aujourd'hui"
+                            >
+                              {STATUTS_CONTACT.map((st) => (
+                                <option key={st.value} value={st.value}>{st.label}</option>
+                              ))}
+                            </select>
+                          </td>
+                        )}
+
+                        {visibleCols.date_statut && (
+                          <td className="py-1.5 px-3 border-r border-slate-200 text-slate-600 text-[11px] font-medium">
+                            {formatDateStatut(contact.dernier_contact)}
+                          </td>
+                        )}
 
                         {visibleCols.organisme && (
                           <td className="py-1.5 px-3 border-r border-slate-200 text-slate-400 pl-6 text-[11px] truncate">
@@ -761,24 +817,6 @@ export const AppelsProjetsTable: React.FC<AppelsProjetsTableProps> = ({
                         {visibleCols.statut_dossier && (
                           <td className="py-1.5 px-3 border-r border-slate-200 text-slate-400 text-[10px]">
                             {aap.statut_dossier}
-                          </td>
-                        )}
-
-                        {visibleCols.statut_contact && (
-                          <td className="py-1.5 px-3 border-r border-slate-200">
-                            <select
-                              value={contact.statut}
-                              onChange={(e) => onUpdateContactStatut(contact.id, e.target.value)}
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(contact.statut)}`}
-                            >
-                              <option value="À contacter">À contacter</option>
-                              <option value="Contacté">Contacté (J0)</option>
-                              <option value="Relance 1">Relance 1</option>
-                              <option value="Relance 2">Relance 2</option>
-                              <option value="Échange en cours">Échange</option>
-                              <option value="Intéressé / RDV">Intéressé</option>
-                              <option value="Refus / Standby">Refus</option>
-                            </select>
                           </td>
                         )}
 

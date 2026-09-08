@@ -16,7 +16,7 @@ export interface Contact {
   email: string;
   telephone: string;
   linkedin: string;
-  statut: 'À contacter' | 'Contacté' | 'Relance 1' | 'Relance 2' | 'Échange en cours' | 'Intéressé' | 'Refus' | 'Inactif' | string;
+  statut: 'À contacter' | 'Brouillon prêt' | 'Mail 1 envoyé' | 'Mail 2 envoyé' | 'Mail 3 envoyé' | 'Relance téléphone' | 'Réponse reçue' | 'Échange en cours' | 'RDV planifié' | 'Proposition envoyée' | 'Partenariat signé' | 'Sans réponse' | 'Refus' | 'Email invalide' | string;
   notes: string;
   dernier_contact?: string | null;
   prochaine_relance?: string | null;

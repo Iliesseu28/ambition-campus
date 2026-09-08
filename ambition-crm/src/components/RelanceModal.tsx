@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Contact, Relance } from '../types';
+import { STATUTS_CONTACT, migrerStatut } from '../lib/statuts';
 import { X, Send, Calendar, Clock, MessageSquare, Sparkles, Check, User } from 'lucide-react';
 
 interface RelanceModalProps {
@@ -24,7 +25,7 @@ export const RelanceModal: React.FC<RelanceModalProps> = ({
   const [canal, setCanal] = useState<Relance['type_canal']>('Email');
   const [message, setMessage] = useState('');
   const [prochaineDate, setProchaineDate] = useState('');
-  const [nouveauStatut, setNouveauStatut] = useState(contact.statut);
+  const [nouveauStatut, setNouveauStatut] = useState(migrerStatut(contact.statut));
   const [copied, setCopied] = useState(false);
 
   const contactRelances = relances.filter(
@@ -194,13 +195,9 @@ https://ambitioncampus.com`;
                   onChange={(e) => setNouveauStatut(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
-                  <option value="À contacter">À contacter</option>
-                  <option value="Contacté">Contacté (J0)</option>
-                  <option value="Relance 1">Relance 1 (J+7)</option>
-                  <option value="Relance 2">Relance 2 (J+15)</option>
-                  <option value="Échange en cours">Échange en cours</option>
-                  <option value="Intéressé / RDV">Intéressé / RDV</option>
-                  <option value="Refus / Standby">Refus / Standby</option>
+                  {STATUTS_CONTACT.map((st) => (
+                    <option key={st.value} value={st.value}>{st.label}</option>
+                  ))}
                 </select>
               </div>
             </div>

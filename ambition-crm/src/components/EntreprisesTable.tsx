@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import type { Entreprise, Contact, Relance, CustomField } from '../types';
+import {
+  STATUTS_CONTACT,
+  getStatutBadgeStyle,
+  migrerStatut,
+  aujourdhui,
+  formatDateStatut,
+} from '../lib/statuts';
 import { 
   Search, 
   Plus, 
@@ -19,7 +26,8 @@ import {
   User,
   Activity,
   DollarSign,
-  Edit2
+  Edit2,
+  CalendarClock
 } from 'lucide-react';
 
 interface EntreprisesTableProps {
@@ -31,7 +39,7 @@ interface EntreprisesTableProps {
   onOpenAddContact: (entreprise: Entreprise) => void;
   onOpenAddOrganisation: () => void;
   onOpenAddColumn: () => void;
-  onUpdateContactStatut: (contactId: string, statut: string) => void;
+  onUpdateContactStatut: (contactId: string, statut: string, dateStatut?: string) => void;
   onCellEdit: (type: 'entreprise' | 'contact', id: string, field: string, value: string) => void;
 }
 
@@ -60,6 +68,8 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
   } | null>(null);
 
   const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>({
+    statut: true,
+    date_statut: true,
     organisation: true,
     secteur: true,
     priorite: true,
@@ -68,7 +78,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
     contact_email: true,
     contact_phone: true,
     contact_linkedin: true,
-    statut: true,
     ticket: true,
     relance_action: true,
   });
@@ -125,24 +134,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
     return matchSearch && matchSecteur && matchPriorite;
   });
 
-  const getStatutBadgeStyle = (statut: string) => {
-    if (statut.includes('Intéressé') || statut.includes('RDV')) {
-      return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-    }
-    if (statut.includes('Contacté')) {
-      return 'bg-blue-100 text-blue-800 border-blue-300';
-    }
-    if (statut.includes('Relance 1')) {
-      return 'bg-amber-100 text-amber-800 border-amber-300';
-    }
-    if (statut.includes('Relance 2')) {
-      return 'bg-orange-100 text-orange-800 border-orange-300';
-    }
-    if (statut.includes('Refus')) {
-      return 'bg-slate-100 text-slate-600 border-slate-300';
-    }
-    return 'bg-slate-100 text-slate-700 border-slate-300';
-  };
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden font-sans relative">
@@ -185,6 +176,8 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                   Afficher / Masquer Colonnes
                 </div>
                 {Object.entries({
+                  statut: 'Statut (colonne 1)',
+                  date_statut: 'Date du statut (colonne 2)',
                   organisation: 'Organisation',
                   secteur: 'Secteur d\'activité',
                   priorite: 'Priorité',
@@ -193,7 +186,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                   contact_email: 'Email direct',
                   contact_phone: 'Téléphone',
                   contact_linkedin: 'Profil LinkedIn',
-                  statut: 'Statut du contact',
                   ticket: 'Ticket Estimé',
                   relance_action: 'Bouton Relance / Actions',
                 }).map(([key, label]) => (
@@ -267,6 +259,24 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                 #
               </th>
 
+              {visibleCols.statut && (
+                <th className="w-44 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
+                  <div className="flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Statut</span>
+                  </div>
+                </th>
+              )}
+
+              {visibleCols.date_statut && (
+                <th className="w-32 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarClock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Date du statut</span>
+                  </div>
+                </th>
+              )}
+
               {visibleCols.organisation && (
                 <th className="w-56 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
                   <div className="flex items-center gap-1.5">
@@ -333,15 +343,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                 </th>
               )}
 
-              {visibleCols.statut && (
-                <th className="w-40 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
-                  <div className="flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Statut de Prospection</span>
-                  </div>
-                </th>
-              )}
-
               {visibleCols.ticket && (
                 <th className="w-36 py-2.5 px-3 border-r border-slate-200 bg-[#F8F9FA]">
                   <div className="flex items-center gap-1.5">
@@ -377,6 +378,11 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
             ) : (
               filteredEntreprises.map((ent, idx) => {
                 const entContacts = contacts.filter((c) => c.target_id === ent.id);
+                const dateStatutEnt = entContacts
+                  .map((c) => c.dernier_contact)
+                  .filter(Boolean)
+                  .sort()
+                  .pop();
                 const isExpanded = expandedEntreprises[ent.id] ?? true;
 
                 return (
@@ -400,6 +406,22 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                           <span>{idx + 1}</span>
                         </div>
                       </td>
+
+                      {/* Colonne 1 : statut global de l'entreprise */}
+                      {visibleCols.statut && (
+                        <td className="py-2 px-3 border-r border-slate-200">
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold border ${getStatutBadgeStyle(ent.statut_global)}`}>
+                            {migrerStatut(ent.statut_global)}
+                          </span>
+                        </td>
+                      )}
+
+                      {/* Colonne 2 : date du dernier statut */}
+                      {visibleCols.date_statut && (
+                        <td className="py-2 px-3 border-r border-slate-200 text-slate-600 text-[11px] font-medium">
+                          {formatDateStatut(dateStatutEnt)}
+                        </td>
+                      )}
 
                       {/* Nom Entreprise Editable */}
                       {visibleCols.organisation && (
@@ -499,13 +521,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                         <td className="py-2 px-3 border-r border-slate-200 text-slate-400">-</td>
                       )}
 
-                      {/* Statut Global */}
-                      {visibleCols.statut && (
-                        <td className="py-2 px-3 border-r border-slate-200 font-semibold text-slate-700 text-[11px]">
-                          {ent.statut_global}
-                        </td>
-                      )}
-
                       {/* Ticket Estimé Editable */}
                       {visibleCols.ticket && (
                         <td 
@@ -574,6 +589,29 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                         <td className="py-1.5 px-2 text-center border-r border-slate-200 text-slate-400 font-mono text-[10px]">
                           {idx + 1}.{cIdx + 1}
                         </td>
+
+                        {/* Colonne 1 : statut du contact */}
+                        {visibleCols.statut && (
+                          <td className="py-1.5 px-3 border-r border-slate-200">
+                            <select
+                              value={migrerStatut(contact.statut)}
+                              onChange={(e) => onUpdateContactStatut(contact.id, e.target.value, aujourdhui())}
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(contact.statut)}`}
+                              title="Changer le statut horodate la colonne « Date du statut » à aujourd'hui"
+                            >
+                              {STATUTS_CONTACT.map((st) => (
+                                <option key={st.value} value={st.value}>{st.label}</option>
+                              ))}
+                            </select>
+                          </td>
+                        )}
+
+                        {/* Colonne 2 : date du dernier statut */}
+                        {visibleCols.date_statut && (
+                          <td className="py-1.5 px-3 border-r border-slate-200 text-slate-600 text-[11px] font-medium">
+                            {formatDateStatut(contact.dernier_contact)}
+                          </td>
+                        )}
 
                         {visibleCols.organisation && (
                           <td className="py-1.5 px-3 border-r border-slate-200 text-slate-400 pl-6 text-[11px] truncate">
@@ -734,25 +772,6 @@ export const EntreprisesTable: React.FC<EntreprisesTableProps> = ({
                             ) : (
                               <span className="text-slate-400">-</span>
                             )}
-                          </td>
-                        )}
-
-                        {/* Statut Contact */}
-                        {visibleCols.statut && (
-                          <td className="py-1.5 px-3 border-r border-slate-200">
-                            <select
-                              value={contact.statut}
-                              onChange={(e) => onUpdateContactStatut(contact.id, e.target.value)}
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold border focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer ${getStatutBadgeStyle(contact.statut)}`}
-                            >
-                              <option value="À contacter">À contacter</option>
-                              <option value="Contacté">Contacté (J0)</option>
-                              <option value="Relance 1">Relance 1 (J+7)</option>
-                              <option value="Relance 2">Relance 2 (J+15)</option>
-                              <option value="Échange en cours">Échange</option>
-                              <option value="Intéressé / RDV">Intéressé</option>
-                              <option value="Refus / Standby">Refus</option>
-                            </select>
                           </td>
                         )}
 

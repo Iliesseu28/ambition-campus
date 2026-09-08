@@ -358,9 +358,9 @@ L'équipe Ambition Campus`
               <span>Protocole d'envoi & bonnes pratiques pour l'équipe</span>
             </h4>
             <ul className="list-disc list-inside text-blue-950 text-[11px] space-y-1">
-              <li><b>J0 (Prise de contact) :</b> Envoyer le message générique de prise de contact à froid avec la plaquette PDF Ambition Campus en pièce jointe et passer le statut du contact à <code>Contacté (J0)</code>.</li>
-              <li><b>J+7 (Relance 1) :</b> Si pas de réponse sous 7 jours, envoyer une relance courte ou une approche LinkedIn personnalisée.</li>
-              <li><b>J+15 (Relance 2) :</b> Dernière relance avec proposition d'invitation jury ou d'échange téléphonique de 10-15 min.</li>
+              <li><b>J0 (Prise de contact) :</b> Le brouillon est préparé (statut <code>Brouillon prêt</code>), puis envoyé avec la plaquette PDF Ambition Campus en pièce jointe : passer le statut à <code>Mail 1 envoyé</code>. La colonne « Date du statut » s'horodate toute seule.</li>
+              <li><b>J+7 (Relance 1) :</b> Si pas de réponse sous 7 jours, relance courte ou approche LinkedIn : statut <code>Mail 2 envoyé</code>.</li>
+              <li><b>J+15 (Relance 2) :</b> Dernière relance (invitation jury ou échange de 10-15 min) : statut <code>Mail 3 envoyé</code>. Sans retour ensuite : <code>Sans réponse</code>. Après une réponse : <code>Réponse reçue</code> → <code>Échange en cours</code> → <code>RDV planifié</code> → <code>Proposition envoyée</code> → <code>Partenariat signé</code>, ou <code>Refus</code>.</li>
               <li><b>Mise à jour :</b> Toujours consigner la date et le canal via le bouton <b>« Relancer »</b> de la ligne correspondante.</li>
             </ul>
           </div>

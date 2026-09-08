@@ -1,4 +1,5 @@
 import React from 'react';
+import { estContacte, estChaud } from '../lib/statuts';
 import type { Entreprise, AppelProjet, Contact, Relance } from '../types';
 import { Building2, FileText, Users, MessageSquare, TrendingUp } from 'lucide-react';
 
@@ -19,8 +20,8 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   const totalContacts = contacts.length;
   const totalRelances = relances.length;
 
-  const contactsContactes = contacts.filter((c) => c.statut !== 'À contacter').length;
-  const contactsInteresses = contacts.filter((c) => c.statut.includes('Intéressé') || c.statut.includes('RDV')).length;
+  const contactsContactes = contacts.filter((c) => estContacte(c.statut)).length;
+  const contactsInteresses = contacts.filter((c) => estChaud(c.statut)).length;
 
   return (
     <div className="space-y-6">

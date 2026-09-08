@@ -1,5 +1,6 @@
 import { Entreprise, AppelProjet, Contact, Relance, CustomField, Feedback } from '../types';
 import initialData from '../initialData.json';
+import { migrerStatut } from './statuts';
 
 const STORAGE_KEY = 'ambition_campus_crm_data_v3';
 
@@ -51,6 +52,22 @@ const defaultFeedbacks: Feedback[] = [
   }
 ];
 
+/**
+ * Rebascule les anciens libellés de statut (« Contacté », « Relance 1 »…) sur le
+ * nouveau vocabulaire (« Mail 1 envoyé », « Mail 2 envoyé »…). Appliqué à chaque
+ * chargement : les postes de l'équipe n'ont rien à réinitialiser.
+ */
+function migrerStatuts(data: CRMData): CRMData {
+  return {
+    ...data,
+    contacts: (data.contacts || []).map((c) => ({ ...c, statut: migrerStatut(c.statut) })),
+    entreprises: (data.entreprises || []).map((e) => ({
+      ...e,
+      statut_global: migrerStatut(e.statut_global),
+    })),
+  };
+}
+
 export function loadData(): CRMData {
   const local = localStorage.getItem(STORAGE_KEY);
   if (!local) {
@@ -59,8 +76,9 @@ export function loadData(): CRMData {
       custom_fields: [],
       feedbacks: defaultFeedbacks,
     };
-    saveData(dataWithFields);
-    return dataWithFields;
+    const migre = migrerStatuts(dataWithFields);
+    saveData(migre);
+    return migre;
   }
   try {
     const parsed = JSON.parse(local);
@@ -70,7 +88,7 @@ export function loadData(): CRMData {
     if (!parsed.feedbacks || parsed.feedbacks.length === 0) {
       parsed.feedbacks = defaultFeedbacks;
     }
-    return parsed;
+    return migrerStatuts(parsed);
   } catch (e) {
     console.error('Error parsing local data, falling back to initial data', e);
     const dataWithFields: CRMData = {
@@ -78,7 +96,7 @@ export function loadData(): CRMData {
       custom_fields: [],
       feedbacks: defaultFeedbacks,
     };
-    return dataWithFields;
+    return migrerStatuts(dataWithFields);
   }
 }
 
@@ -92,6 +110,7 @@ export function resetToDefault(): CRMData {
     custom_fields: [],
     feedbacks: defaultFeedbacks,
   };
-  saveData(dataWithFields);
-  return dataWithFields;
+  const migre = migrerStatuts(dataWithFields);
+  saveData(migre);
+  return migre;
 }
